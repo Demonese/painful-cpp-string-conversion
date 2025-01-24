@@ -610,6 +610,110 @@ namespace encoding {
     inline std::u32string to_u32string(std::wstring const& s) {
         return to_u32string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
     }
+
+    // Always assume that the std::string stores text encoded in UTF-8
+    inline std::wstring to_wstring(std::string const& s) {
+        std::wstring buffer;
+        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        size_t n = s.size();
+        size_t o{};
+        char32_t c{};
+        char16_t t[4]{};
+        size_t m{};
+        while (n > 0) {
+            o = details::utf8_to_utf32(p, n, c);
+            p += o;
+            n -= o;
+            m = details::utf32_to_utf16(c, t);
+            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+        }
+        return buffer;
+    }
+
+    // Always assume that the std::string stores text encoded in UTF-8
+    inline std::wstring to_wstring(std::string_view const& s) {
+        std::wstring buffer;
+        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        size_t n = s.size();
+        size_t o{};
+        char32_t c{};
+        char16_t t[4]{};
+        size_t m{};
+        while (n > 0) {
+            o = details::utf8_to_utf32(p, n, c);
+            p += o;
+            n -= o;
+            m = details::utf32_to_utf16(c, t);
+            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+        }
+        return buffer;
+    }
+
+    inline std::wstring to_wstring(std::u8string_view const& s) {
+        std::wstring buffer;
+        char8_t const* p = s.data();
+        size_t n = s.size();
+        size_t o{};
+        char32_t c{};
+        char16_t t[4]{};
+        size_t m{};
+        while (n > 0) {
+            o = details::utf8_to_utf32(p, n, c);
+            p += o;
+            n -= o;
+            m = details::utf32_to_utf16(c, t);
+            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+        }
+        return buffer;
+    }
+
+    inline std::wstring to_wstring(std::u8string const& s) {
+        std::wstring buffer;
+        char8_t const* p = s.data();
+        size_t n = s.size();
+        size_t o{};
+        char32_t c{};
+        char16_t t[4]{};
+        size_t m{};
+        while (n > 0) {
+            o = details::utf8_to_utf32(p, n, c);
+            p += o;
+            n -= o;
+            m = details::utf32_to_utf16(c, t);
+            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+        }
+        return buffer;
+    }
+
+    inline std::wstring to_wstring(std::u16string_view const& s) {
+        return { reinterpret_cast<std::wstring::const_pointer>(s.data()), s.size() };
+    }
+
+    inline std::wstring to_wstring(std::u16string const& s) {
+        return { reinterpret_cast<std::wstring::const_pointer>(s.data()), s.size() };
+    }
+
+    inline std::wstring to_wstring(std::u32string_view const& s) {
+        std::wstring buffer;
+        char16_t t[4]{};
+        size_t m{};
+        for (auto const c : s) {
+            m = details::utf32_to_utf16(c, t);
+            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+        }
+        return buffer;
+    }
+
+    inline std::wstring to_wstring(std::u32string const& s) {
+        std::wstring buffer;
+        char16_t t[4]{};
+        size_t m{};
+        for (auto const c : s) {
+            m = details::utf32_to_utf16(c, t);
+            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+        }
+        return buffer;
+    }
 #endif
 }
 
