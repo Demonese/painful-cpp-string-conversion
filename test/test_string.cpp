@@ -6,11 +6,13 @@
 #include <stdexcept>
 
 namespace {
+    using std::string_view_literals::operator""sv;
+
     void rt_assert_true(bool const condition) {
         if (condition) {
             return;
         }
-        throw std::runtime_error("error");
+        throw std::runtime_error("failed");
     }
 }
 
@@ -27,8 +29,16 @@ int main() {
         char16_t u16_s[4]{};
         size_t u16_s_n = simdutf::convert_valid_utf32_to_utf16(&c, 1, u16_s);
 
-        rt_assert_true(std::string_view(c_s, c_s_n) == s);
-        rt_assert_true(std::u16string_view(u16_s, u16_s_n) == u16);
+        if (encoding::details::is_utf16_h(c) || encoding::details::is_utf16_l(c)) {
+            rt_assert_true(std::string_view(c_s, c_s_n) == ""sv);
+            rt_assert_true(std::u16string_view(u16_s, u16_s_n) == u""sv);
+            rt_assert_true("?"sv == s);
+            rt_assert_true(u"?"sv == u16);
+        }
+        else {
+            rt_assert_true(std::string_view(c_s, c_s_n) == s);
+            rt_assert_true(std::u16string_view(u16_s, u16_s_n) == u16);
+        }
     }
     return 0;
 }

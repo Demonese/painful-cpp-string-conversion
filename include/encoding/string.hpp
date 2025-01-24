@@ -23,12 +23,12 @@ namespace encoding {
 #endif
 
     namespace details {
-        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c <= 0x7f; }
-        [[nodiscard]] inline bool is_utf8_2(char32_t const c) noexcept { return c <= 0x7ff; }
-        [[nodiscard]] inline bool is_utf8_3(char32_t const c) noexcept { return c <= 0xffff; }
-        [[nodiscard]] inline bool is_utf8_4(char32_t const c) noexcept { return c <= 0x1f'ffff; }
-        [[nodiscard]] inline bool is_utf8_5(char32_t const c) noexcept { return c <= 0x3ff'ffff; }
-        [[nodiscard]] inline bool is_utf8_6(char32_t const c) noexcept { return c <= 0x7fff'ffff; }
+        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c >= 0 && c <= 0x7f; }
+        [[nodiscard]] inline bool is_utf8_2(char32_t const c) noexcept { return c > 0x7f && c <= 0x7ff; }
+        [[nodiscard]] inline bool is_utf8_3(char32_t const c) noexcept { return c > 0x7ff && c <= 0xffff; }
+        [[nodiscard]] inline bool is_utf8_4(char32_t const c) noexcept { return c > 0xffff && c <= 0x1f'ffff; }
+        [[nodiscard]] inline bool is_utf8_5(char32_t const c) noexcept { return c > 0x1f'ffff && c <= 0x3ff'ffff; }
+        [[nodiscard]] inline bool is_utf8_6(char32_t const c) noexcept { return c > 0x3ff'ffff && c <= 0x7fff'ffff; }
 
         [[nodiscard]] inline char8_t e_utf8_1(char32_t const c) noexcept { return c & 0x7fui8; }
         [[nodiscard]] inline char8_t e_utf8_2(char32_t const c) noexcept { return 0b11000000ui8 | (((c >> (6 * 1)) & 0b00011111ui8)); }
@@ -37,6 +37,9 @@ namespace encoding {
         [[nodiscard]] inline char8_t e_utf8_5(char32_t const c) noexcept { return 0b11111000ui8 | (((c >> (6 * 4)) & 0b00000011ui8)); }
         [[nodiscard]] inline char8_t e_utf8_6(char32_t const c) noexcept { return 0b11111100ui8 | (((c >> (6 * 5)) & 0b00000001ui8)); }
         [[nodiscard]] inline char8_t e_utf8_m(char32_t const c, int shift) noexcept { return 0x80ui8 | ((c >> shift) & 0x3fui8); }
+
+        [[nodiscard]] inline bool is_utf16_h(char32_t const c) noexcept { return c >= 0xd800ui32 && c <= 0xdbffui32; }
+        [[nodiscard]] inline bool is_utf16_l(char32_t const c) noexcept { return c >= 0xdc00ui32 && c <= 0xdfffui32; }
 
         [[nodiscard]] inline size_t utf32_to_utf8(char32_t const c, char8_t (&s)[8], bool const extended = false) noexcept {
             if (is_utf8_1(c)) {
@@ -50,7 +53,7 @@ namespace encoding {
                 s[2] = 0;
                 return 2;
             }
-            else if (is_utf8_3(c)) {
+            else if (!is_utf16_h(c) && !is_utf16_l(c) && is_utf8_3(c)) {
                 s[0] = e_utf8_3(c);
                 s[1] = e_utf8_m(c, 6 * 1);
                 s[2] = e_utf8_m(c, 6 * 0);
@@ -168,12 +171,12 @@ namespace encoding {
         }
 
         [[nodiscard]] inline size_t utf32_to_utf16(char32_t const c, char16_t (&s)[4]) noexcept {
-            if (c <= 0xffffui32) {
+            if (!is_utf16_h(c) && !is_utf16_l(c) && c <= 0xffffui32) {
                 s[0] = c & 0xffffui16;
                 s[1] = 0;
                 return 1;
             }
-            else if (c <= 0x10'ffffui32) {
+            else if (c > 0xffffui32 && c <= 0x10'ffffui32) {
                 char32_t const d = c - 0x1'0000ui32;
                 s[0] = 0xd800ui16 | ((d >> 10) & 0x3ffui16);
                 s[1] = 0xdc00ui16 | (d & 0x3ffui16);
