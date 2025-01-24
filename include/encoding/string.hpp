@@ -87,7 +87,7 @@ namespace encoding {
             else {
                 s[0] = '?';
                 s[1] = 0;
-                return 7;
+                return 1;
             }
         }
 
