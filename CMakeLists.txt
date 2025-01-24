@@ -3,8 +3,12 @@ project(painful-cpp-string-conversion VERSION 2.0.0 DESCRIPTION "Why the convers
 
 option(PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST "Enable test" OFF)
 
-add_library(painful-cpp-string-conversion INTERFACE)
-target_include_directories(painful-cpp-string-conversion INTERFACE include)
+set(LIB_NAME painful-cpp-string-conversion)
+set(TEST_NAME painful-cpp-string-conversion-test)
+
+add_library(${LIB_NAME} INTERFACE)
+set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER include/encoding/string.hpp)
+target_include_directories(${LIB_NAME} INTERFACE include)
 
 if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
     add_library(simdutf STATIC)
@@ -15,12 +19,14 @@ if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
     target_include_directories(simdutf PUBLIC external/simdutf)
     target_sources(simdutf PRIVATE external/simdutf/simdutf.h external/simdutf/simdutf.cpp)
 
-    set(TEST_NAME painful-cpp-string-conversion-test)
     add_executable(${TEST_NAME})
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(${TEST_NAME} PRIVATE "/utf-8")
     endif ()
     target_compile_features(${TEST_NAME} PRIVATE cxx_std_20)
     target_sources(${TEST_NAME} PRIVATE test/test_string.cpp)
-    target_link_libraries(${TEST_NAME} PRIVATE painful-cpp-string-conversion simdutf)
+    target_link_libraries(${TEST_NAME} PRIVATE ${LIB_NAME} simdutf)
 endif ()
+
+include(GNUInstallDirs)
+install(TARGETS ${LIB_NAME} PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/encoding)
