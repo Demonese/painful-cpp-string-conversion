@@ -12,4 +12,6 @@ Why the conversion between C++ string/wstring/u8string/u16string/u32string so pa
 | **std::u32string** | :warning:       | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 | **std::wstring**   | :warning:       | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
 
+* :white_check_mark: OK.
 * :warning: Assuming that std::string always stores text in UTF-8 encoding.
+* std::wstring can be considered as std::u16string on Windows.
