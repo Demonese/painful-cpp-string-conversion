@@ -29,6 +29,8 @@ int main() {
         char16_t u16_s[4]{};
         size_t u16_s_n = simdutf::convert_valid_utf32_to_utf16(&c, 1, u16_s);
 
+        rt_assert_true(std::memcmp(s.data(), u8.data(), sizeof(char8_t) * s.size()) == 0);
+        rt_assert_true(std::memcmp(w.data(), u16.data(), sizeof(char16_t) * s.size()) == 0);
         if (encoding::details::is_utf16_h(c) || encoding::details::is_utf16_l(c)) {
             rt_assert_true(std::string_view(c_s, c_s_n) == ""sv);
             rt_assert_true(std::u16string_view(u16_s, u16_s_n) == u""sv);
