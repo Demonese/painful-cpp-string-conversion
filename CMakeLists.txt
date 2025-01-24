@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(painful-cpp-string-conversion VERSION 1.0.0 DESCRIPTION "Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?" LANGUAGES CXX)
+project(painful-cpp-string-conversion VERSION 2.0.0 DESCRIPTION "Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?" LANGUAGES CXX)
 
 option(PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST "Enable test" OFF)
 
