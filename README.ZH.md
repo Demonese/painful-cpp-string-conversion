@@ -1,12 +1,12 @@
-# Painful C++ string conversion
+# 痛苦的 C++ 字符串转换
 
 | [English](./README.md) | [中文](./README.ZH.md) |
 
-Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?
+为什么 C++ string/wstring/u8string/u16string/u32string 之间的转换这么痛苦？
 
-## Usage
+## 用法
 
-You can convert strings through the following API:
+你可以通过以下 API 转换字符串：
 
 * `encoding::to_string`
 * `encoding::to_u8string`
@@ -26,7 +26,7 @@ int main() {
 }
 ```
 
-## Conversion matrix
+## 互转表格
 
 |                    | **std::string** | **std::u8string**  | **std::u16string** | **std::u32string** |  **std::wstring**  |
 |:------------------:|:---------------:|:------------------:|:------------------:|:------------------:|:------------------:|
@@ -36,13 +36,13 @@ int main() {
 | **std::u32string** | :warning:       | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
 | **std::wstring**   | :warning:       | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
 
-* :white_check_mark: OK.
-* :warning: Assuming that std::string always stores text in UTF-8 encoding.
-* std::wstring can be considered as std::u16string on Windows.
+* :white_check_mark: 可以转换。
+* :warning: 始终假设 std::string 以 UTF-8 编码储存文本。
+* Windows 的 std::wstring 可以看作 std::u16string。
 
-# TODO
+# 待办事项
 
-* [ ] Supports raw character array as parameter
-* [ ] Supports span or span-like types as parameter
-* [ ] Clean up code and reduce duplication
-* [ ] Supports simdutf as a high-speed conversion implementation
+* [ ] 支持原始字符数组作为参数
+* [ ] 支持 span 或者类似 span 的类型作为参数
+* [ ] 清理代码减少冗余重复代码
+* [ ] 支持使用 simdutf 库执行高性能转换
