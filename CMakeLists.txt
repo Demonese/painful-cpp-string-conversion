@@ -4,7 +4,7 @@ project(painful-cpp-string-conversion VERSION 1.0.0 DESCRIPTION "Why the convers
 option(PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST "Enable test" OFF)
 
 add_library(painful-cpp-string-conversion INTERFACE)
-target_include_directories(painful-cpp-string-conversion INTERFACE .)
+target_include_directories(painful-cpp-string-conversion INTERFACE include)
 
 if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
     add_library(simdutf STATIC)
