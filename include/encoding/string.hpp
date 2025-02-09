@@ -187,17 +187,15 @@ namespace encoding {
 
     // std::string
 
-#ifdef __cpp_lib_char8_t
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::string to_string(std::u8string_view const& s) {
-        return { reinterpret_cast<char const*>(s.data()), s.size() };
+        return { reinterpret_cast<std::string::const_pointer>(s.data()), s.size() };
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::string to_string(std::u8string const& s) {
-        return { reinterpret_cast<char const*>(s.c_str()), s.length() };
+        return { reinterpret_cast<std::string::const_pointer>(s.c_str()), s.length() };
     }
-#endif
 
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::string to_string(std::u16string_view const& s) {
@@ -213,7 +211,7 @@ namespace encoding {
             p += o;
             n -= o;
             m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<char*>(t), m);
+            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -232,7 +230,7 @@ namespace encoding {
             p += o;
             n -= o;
             m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<char*>(t), m);
+            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -244,7 +242,7 @@ namespace encoding {
         size_t m{};
         for (auto const c : s) {
             m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<char*>(t), m);
+            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -256,14 +254,13 @@ namespace encoding {
         size_t m{};
         for (auto const c : s) {
             m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<char*>(t), m);
+            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
         }
         return buffer;
     }
 
     // std::u8string
 
-#ifdef __cpp_lib_char8_t
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::u8string to_u8string(std::string_view const& s) {
         return { reinterpret_cast<std::u8string::const_pointer>(s.data()), s.size() };
@@ -331,7 +328,6 @@ namespace encoding {
         }
         return buffer;
     }
-#endif
 
     // std::u16string
 
@@ -528,6 +524,7 @@ namespace encoding {
     // std::wstring
 
 #if WCHAR_MAX == UINT32_MAX
+    // We consider wchar_t and char32_t as the same type
     static_assert(sizeof(wchar_t) == sizeof(char32_t));
 
     // Always assume that the std::string stores text encoded in UTF-8
@@ -540,7 +537,6 @@ namespace encoding {
         return to_string(std::u32string_view(reinterpret_cast<char32_t const*>(s.data()), s.size()));
     }
 
-#ifdef __cpp_lib_char8_t
     inline std::u8string to_u8string(std::wstring_view const& s) {
         return to_u8string(std::u32string_view(reinterpret_cast<char32_t const*>(s.data()), s.size()));
     }
@@ -548,7 +544,6 @@ namespace encoding {
     inline std::u8string to_u8string(std::wstring const& s) {
         return to_u8string(std::u32string_view(reinterpret_cast<char32_t const*>(s.data()), s.size()));
     }
-#endif
 
     inline std::u16string to_u16string(std::wstring_view const& s) {
         return to_u16string(std::u32string_view(reinterpret_cast<char32_t const*>(s.data()), s.size()));
@@ -567,42 +562,41 @@ namespace encoding {
     }
 
 #elif WCHAR_MAX == UINT16_MAX
+    // We consider wchar_t and char16_t as the same type
     static_assert(sizeof(wchar_t) == sizeof(char16_t));
 
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::string to_string(std::wstring_view const& s) {
-        return to_string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
+        return to_string(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::string to_string(std::wstring const& s) {
-        return to_string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
+        return to_string(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
     }
 
-#ifdef __cpp_lib_char8_t
     inline std::u8string to_u8string(std::wstring_view const& s) {
-        return to_u8string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
+        return to_u8string(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
     }
 
     inline std::u8string to_u8string(std::wstring const& s) {
-        return to_u8string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
+        return to_u8string(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
     }
-#endif
 
     inline std::u16string to_u16string(std::wstring_view const& s) {
-        return { reinterpret_cast<char16_t const*>(s.data()), s.size() };
+        return { reinterpret_cast<std::u16string::const_pointer>(s.data()), s.size() };
     }
 
     inline std::u16string to_u16string(std::wstring const& s) {
-        return { reinterpret_cast<char16_t const*>(s.data()), s.size() };
+        return { reinterpret_cast<std::u16string::const_pointer>(s.data()), s.size() };
     }
 
     inline std::u32string to_u32string(std::wstring_view const& s) {
-        return to_u32string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
+        return to_u32string(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
     }
 
     inline std::u32string to_u32string(std::wstring const& s) {
-        return to_u32string(std::u16string_view(reinterpret_cast<char16_t const*>(s.data()), s.size()));
+        return to_u32string(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
@@ -619,7 +613,7 @@ namespace encoding {
             p += o;
             n -= o;
             m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -638,7 +632,7 @@ namespace encoding {
             p += o;
             n -= o;
             m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -656,7 +650,7 @@ namespace encoding {
             p += o;
             n -= o;
             m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -674,7 +668,7 @@ namespace encoding {
             p += o;
             n -= o;
             m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -693,7 +687,7 @@ namespace encoding {
         size_t m{};
         for (auto const c : s) {
             m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
         }
         return buffer;
     }
@@ -704,7 +698,7 @@ namespace encoding {
         size_t m{};
         for (auto const c : s) {
             m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<wchar_t const*>(t), m);
+            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
         }
         return buffer;
     }
