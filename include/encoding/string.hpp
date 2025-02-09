@@ -23,7 +23,7 @@ namespace encoding {
 #endif
 
     namespace details {
-        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c >= 0 && c <= 0x7f; }
+        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c <= 0x7f; }
         [[nodiscard]] inline bool is_utf8_2(char32_t const c) noexcept { return c > 0x7f && c <= 0x7ff; }
         [[nodiscard]] inline bool is_utf8_3(char32_t const c) noexcept { return c > 0x7ff && c <= 0xffff; }
         [[nodiscard]] inline bool is_utf8_4(char32_t const c) noexcept { return c > 0xffff && c <= 0x1f'ffff; }
@@ -36,7 +36,7 @@ namespace encoding {
         [[nodiscard]] inline char8_t e_utf8_4(char32_t const c) noexcept { return 0b11110000ui8 | (((c >> (6 * 3)) & 0b00000111ui8)); }
         [[nodiscard]] inline char8_t e_utf8_5(char32_t const c) noexcept { return 0b11111000ui8 | (((c >> (6 * 4)) & 0b00000011ui8)); }
         [[nodiscard]] inline char8_t e_utf8_6(char32_t const c) noexcept { return 0b11111100ui8 | (((c >> (6 * 5)) & 0b00000001ui8)); }
-        [[nodiscard]] inline char8_t e_utf8_m(char32_t const c, int shift) noexcept { return 0x80ui8 | ((c >> shift) & 0x3fui8); }
+        [[nodiscard]] inline char8_t e_utf8_m(char32_t const c, int const shift) noexcept { return 0x80ui8 | ((c >> shift) & 0x3fui8); }
 
         [[nodiscard]] inline bool is_utf16_h(char32_t const c) noexcept { return c >= 0xd800ui32 && c <= 0xdbffui32; }
         [[nodiscard]] inline bool is_utf16_l(char32_t const c) noexcept { return c >= 0xdc00ui32 && c <= 0xdfffui32; }
@@ -47,20 +47,20 @@ namespace encoding {
                 s[1] = 0;
                 return 1;
             }
-            else if (is_utf8_2(c)) {
+            if (is_utf8_2(c)) {
                 s[0] = e_utf8_2(c);
                 s[1] = e_utf8_m(c, 6 * 0);
                 s[2] = 0;
                 return 2;
             }
-            else if (!is_utf16_h(c) && !is_utf16_l(c) && is_utf8_3(c)) {
+            if (!is_utf16_h(c) && !is_utf16_l(c) && is_utf8_3(c)) {
                 s[0] = e_utf8_3(c);
                 s[1] = e_utf8_m(c, 6 * 1);
                 s[2] = e_utf8_m(c, 6 * 0);
                 s[3] = 0;
                 return 3;
             }
-            else if (is_utf8_4(c)) {
+            if (is_utf8_4(c)) {
                 s[0] = e_utf8_4(c);
                 s[1] = e_utf8_m(c, 6 * 2);
                 s[2] = e_utf8_m(c, 6 * 1);
@@ -68,7 +68,7 @@ namespace encoding {
                 s[4] = 0;
                 return 4;
             }
-            else if (extended && is_utf8_5(c)) {
+            if (extended && is_utf8_5(c)) {
                 s[0] = e_utf8_5(c);
                 s[1] = e_utf8_m(c, 6 * 3);
                 s[2] = e_utf8_m(c, 6 * 2);
@@ -77,7 +77,7 @@ namespace encoding {
                 s[5] = 0;
                 return 5;
             }
-            else if (extended && is_utf8_6(c)) {
+            if (extended && is_utf8_6(c)) {
                 s[0] = e_utf8_6(c);
                 s[1] = e_utf8_m(c, 6 * 4);
                 s[2] = e_utf8_m(c, 6 * 3);
@@ -87,11 +87,9 @@ namespace encoding {
                 s[6] = 0;
                 return 6;
             }
-            else {
-                s[0] = '?';
-                s[1] = 0;
-                return 1;
-            }
+            s[0] = '?';
+            s[1] = 0;
+            return 1;
         }
 
         [[nodiscard]] inline bool is_utf8_1(char8_t const c) noexcept { return (c & 0x80ui8) == 0x00ui8; }
@@ -114,7 +112,7 @@ namespace encoding {
                 c = s[0];
                 return 1;
             }
-            else if (n >= 2 && is_utf8_2(s[0])) {
+            if (n >= 2 && is_utf8_2(s[0])) {
                 if (is_utf8_m(s[1])) {
                     c = d_utf8_2(s[0]) | d_utf8_m(s[1], 0);
                     return 2;
@@ -176,18 +174,16 @@ namespace encoding {
                 s[1] = 0;
                 return 1;
             }
-            else if (c > 0xffffui32 && c <= 0x10'ffffui32) {
+            if (c > 0xffffui32 && c <= 0x10'ffffui32) {
                 char32_t const d = c - 0x1'0000ui32;
                 s[0] = 0xd800ui16 | ((d >> 10) & 0x3ffui16);
                 s[1] = 0xdc00ui16 | (d & 0x3ffui16);
                 s[2] = 0;
                 return 2;
             }
-            else {
-                s[0] = u'?';
-                s[1] = 0;
-                return 1;
-            }
+            s[0] = u'?';
+            s[1] = 0;
+            return 1;
         }
     }
 
@@ -344,7 +340,7 @@ namespace encoding {
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::u16string to_u16string(std::string_view const& s) {
         std::u16string buffer;
-        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
         size_t o{};
         char32_t c{};
@@ -363,7 +359,7 @@ namespace encoding {
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::u16string to_u16string(std::string const& s) {
         std::u16string buffer;
-        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
         size_t o{};
         char32_t c{};
@@ -442,7 +438,7 @@ namespace encoding {
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::u32string to_u32string(std::string_view const& s) {
         std::u32string buffer;
-        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
         size_t o{};
         char32_t c{};
@@ -458,7 +454,7 @@ namespace encoding {
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::u32string to_u32string(std::string const& s) {
         std::u32string buffer;
-        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
         size_t o{};
         char32_t c{};
@@ -614,7 +610,7 @@ namespace encoding {
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::wstring to_wstring(std::string const& s) {
         std::wstring buffer;
-        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
         size_t o{};
         char32_t c{};
@@ -633,7 +629,7 @@ namespace encoding {
     // Always assume that the std::string stores text encoded in UTF-8
     inline std::wstring to_wstring(std::string_view const& s) {
         std::wstring buffer;
-        char8_t const* p = reinterpret_cast<char8_t const*>(s.data());
+        auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
         size_t o{};
         char32_t c{};
