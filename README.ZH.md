@@ -38,8 +38,8 @@ int main() {
 
 |                        | **std::string_view** | **std::u8string_view** |
 |:----------------------:|:--------------------:|:----------------------:|
-|  **std::string_view**  |                      |   :white_check_mark:   |
-| **std::u8string_view** |  :white_check_mark:  |                        |
+|  **std::string_view**  |                      |       :warning:        |
+| **std::u8string_view** |      :warning:       |                        |
 
 * :white_check_mark: 可以转换。
 * :warning: 始终假设 std::string 以 UTF-8 编码储存文本。

@@ -38,8 +38,8 @@ int main() {
 
 |                        | **std::string_view** | **std::u8string_view** |
 |:----------------------:|:--------------------:|:----------------------:|
-|  **std::string_view**  |                      |   :white_check_mark:   |
-| **std::u8string_view** |  :white_check_mark:  |                        |
+|  **std::string_view**  |                      |       :warning:        |
+| **std::u8string_view** |      :warning:       |                        |
 
 * :white_check_mark: OK.
 * :warning: Assuming that std::string always stores text in UTF-8 encoding.
