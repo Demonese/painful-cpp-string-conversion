@@ -16,12 +16,12 @@
 
 ```c++
 #include <iostream>
-#include <encoding/string.hpp>
+#include <ext/string.hpp>
 
 using std::string_view_literals::operator""sv;
 
 int main() {
-  std::wcout << encoding::to_wstring("Hello world!"sv) << std::endl;
+  std::wcout << ext::to_wstring("Hello world!"sv) << std::endl;
   return 0;
 }
 ```
@@ -30,7 +30,7 @@ int main() {
 
 ```c++
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
-#include <encoding/string.hpp>
+#include <ext/string.hpp>
 ```
 
 ## 互转表格
