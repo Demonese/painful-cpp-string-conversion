@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(painful-cpp-string-conversion VERSION 2.0.0 DESCRIPTION "Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?" LANGUAGES CXX)
+project(painful-cpp-string-conversion VERSION 3.0.0 DESCRIPTION "Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?" LANGUAGES CXX)
 
 option(PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST "Enable test" OFF)
 
@@ -7,7 +7,7 @@ set(LIB_NAME painful-cpp-string-conversion)
 set(TEST_NAME painful-cpp-string-conversion-test)
 
 add_library(${LIB_NAME} INTERFACE)
-set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER include/encoding/string.hpp)
+set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER include/encoding/string.hpp include/encoding/string_view.hpp)
 target_include_directories(${LIB_NAME} INTERFACE include)
 
 if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)

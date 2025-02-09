@@ -1,4 +1,5 @@
 #include "encoding/string.hpp"
+#include "encoding/string_view.hpp"
 #include "simdutf.h"
 
 #include <format>
