@@ -30,11 +30,16 @@ int main() {
 
 |                    | **std::string** | **std::u8string**  | **std::u16string** | **std::u32string** |  **std::wstring**  |
 |:------------------:|:---------------:|:------------------:|:------------------:|:------------------:|:------------------:|
-| **std::string**    |                 | :warning:          | :warning:          | :warning:          | :warning:          |
-| **std::u8string**  | :warning:       |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| **std::u16string** | :warning:       | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: |
-| **std::u32string** | :warning:       | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
-| **std::wstring**   | :warning:       | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
+|  **std::string**   |                 |     :warning:      |     :warning:      |     :warning:      |     :warning:      |
+| **std::u8string**  |    :warning:    |                    | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| **std::u16string** |    :warning:    | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: |
+| **std::u32string** |    :warning:    | :white_check_mark: | :white_check_mark: |                    | :white_check_mark: |
+|  **std::wstring**  |    :warning:    | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
+
+|                        | **std::string_view** | **std::u8string_view** |
+|:----------------------:|:--------------------:|:----------------------:|
+|  **std::string_view**  |                      |   :white_check_mark:   |
+| **std::u8string_view** |  :white_check_mark:  |                        |
 
 * :white_check_mark: OK.
 * :warning: Assuming that std::string always stores text in UTF-8 encoding.
