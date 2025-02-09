@@ -7,7 +7,8 @@ set(LIB_NAME painful-cpp-string-conversion)
 set(TEST_NAME painful-cpp-string-conversion-test)
 
 add_library(${LIB_NAME} INTERFACE)
-set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER include/encoding/string.hpp include/encoding/string_view.hpp)
+set(LIB_PUBLIC_HEADERS include/ext/string.hpp include/ext/string_view.hpp)
+set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER LIB_PUBLIC_HEADERS)
 target_include_directories(${LIB_NAME} INTERFACE include)
 
 if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
@@ -29,4 +30,4 @@ if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
 endif ()
 
 include(GNUInstallDirs)
-install(TARGETS ${LIB_NAME} PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/encoding)
+install(TARGETS ${LIB_NAME} PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ext)

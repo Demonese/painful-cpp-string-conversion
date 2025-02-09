@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// File: encoding/string_view.hpp
+// File: ext/string_view.hpp
 // Author: 璀境石 (GitHub: @Demonese / @chuikingshek)
 #pragma once
 
