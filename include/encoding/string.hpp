@@ -16,19 +16,19 @@ namespace encoding {
     // The C++ compiler you are using should support UTF-8 4-bytes
     static_assert(sizeof("🙂") == 5 && ("🙂")[0] == '\xF0' && ("🙂")[1] == '\x9F' && ("🙂")[2] == '\x99' && ("🙂")[3] == '\x82');
 
-    // We assume that char has 8 bits
+    // We require char to always be 8-bits
     static_assert(CHAR_BIT == 8);
-#ifdef __cpp_lib_char8_t
+
+    // We consider char and char8_t as the same type
     static_assert(sizeof(char) == sizeof(char8_t));
-#endif
 
     namespace details {
-        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c <= 0x7f; }
-        [[nodiscard]] inline bool is_utf8_2(char32_t const c) noexcept { return c > 0x7f && c <= 0x7ff; }
-        [[nodiscard]] inline bool is_utf8_3(char32_t const c) noexcept { return c > 0x7ff && c <= 0xffff; }
-        [[nodiscard]] inline bool is_utf8_4(char32_t const c) noexcept { return c > 0xffff && c <= 0x1f'ffff; }
-        [[nodiscard]] inline bool is_utf8_5(char32_t const c) noexcept { return c > 0x1f'ffff && c <= 0x3ff'ffff; }
-        [[nodiscard]] inline bool is_utf8_6(char32_t const c) noexcept { return c > 0x3ff'ffff && c <= 0x7fff'ffff; }
+        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c <= 0x7fui32; }
+        [[nodiscard]] inline bool is_utf8_2(char32_t const c) noexcept { return c > 0x7fui32 && c <= 0x7ffui32; }
+        [[nodiscard]] inline bool is_utf8_3(char32_t const c) noexcept { return c > 0x7ffui32 && c <= 0xffffui32; }
+        [[nodiscard]] inline bool is_utf8_4(char32_t const c) noexcept { return c > 0xffffui32 && c <= 0x1f'ffffui32; }
+        [[nodiscard]] inline bool is_utf8_5(char32_t const c) noexcept { return c > 0x1f'ffffui32 && c <= 0x3ff'ffffui32; }
+        [[nodiscard]] inline bool is_utf8_6(char32_t const c) noexcept { return c > 0x3ff'ffffui32 && c <= 0x7fff'ffffui32; }
 
         [[nodiscard]] inline char8_t e_utf8_1(char32_t const c) noexcept { return c & 0x7fui8; }
         [[nodiscard]] inline char8_t e_utf8_2(char32_t const c) noexcept { return 0b11000000ui8 | (((c >> (6 * 1)) & 0b00011111ui8)); }
@@ -36,7 +36,7 @@ namespace encoding {
         [[nodiscard]] inline char8_t e_utf8_4(char32_t const c) noexcept { return 0b11110000ui8 | (((c >> (6 * 3)) & 0b00000111ui8)); }
         [[nodiscard]] inline char8_t e_utf8_5(char32_t const c) noexcept { return 0b11111000ui8 | (((c >> (6 * 4)) & 0b00000011ui8)); }
         [[nodiscard]] inline char8_t e_utf8_6(char32_t const c) noexcept { return 0b11111100ui8 | (((c >> (6 * 5)) & 0b00000001ui8)); }
-        [[nodiscard]] inline char8_t e_utf8_m(char32_t const c, int const shift) noexcept { return 0x80ui8 | ((c >> shift) & 0x3fui8); }
+        [[nodiscard]] inline char8_t e_utf8_m(char32_t const c, int const unit) noexcept { return 0x80ui8 | ((c >> (6 * unit)) & 0x3fui8); }
 
         [[nodiscard]] inline bool is_utf16_h(char32_t const c) noexcept { return c >= 0xd800ui32 && c <= 0xdbffui32; }
         [[nodiscard]] inline bool is_utf16_l(char32_t const c) noexcept { return c >= 0xdc00ui32 && c <= 0xdfffui32; }
@@ -49,45 +49,45 @@ namespace encoding {
             }
             if (is_utf8_2(c)) {
                 s[0] = e_utf8_2(c);
-                s[1] = e_utf8_m(c, 6 * 0);
+                s[1] = e_utf8_m(c, 0);
                 s[2] = 0;
                 return 2;
             }
             if (!is_utf16_h(c) && !is_utf16_l(c) && is_utf8_3(c)) {
                 s[0] = e_utf8_3(c);
-                s[1] = e_utf8_m(c, 6 * 1);
-                s[2] = e_utf8_m(c, 6 * 0);
+                s[1] = e_utf8_m(c, 1);
+                s[2] = e_utf8_m(c, 0);
                 s[3] = 0;
                 return 3;
             }
             if (is_utf8_4(c)) {
                 s[0] = e_utf8_4(c);
-                s[1] = e_utf8_m(c, 6 * 2);
-                s[2] = e_utf8_m(c, 6 * 1);
-                s[3] = e_utf8_m(c, 6 * 0);
+                s[1] = e_utf8_m(c, 2);
+                s[2] = e_utf8_m(c, 1);
+                s[3] = e_utf8_m(c, 0);
                 s[4] = 0;
                 return 4;
             }
             if (extended && is_utf8_5(c)) {
                 s[0] = e_utf8_5(c);
-                s[1] = e_utf8_m(c, 6 * 3);
-                s[2] = e_utf8_m(c, 6 * 2);
-                s[3] = e_utf8_m(c, 6 * 1);
-                s[4] = e_utf8_m(c, 6 * 0);
+                s[1] = e_utf8_m(c, 3);
+                s[2] = e_utf8_m(c, 2);
+                s[3] = e_utf8_m(c, 1);
+                s[4] = e_utf8_m(c, 0);
                 s[5] = 0;
                 return 5;
             }
             if (extended && is_utf8_6(c)) {
                 s[0] = e_utf8_6(c);
-                s[1] = e_utf8_m(c, 6 * 4);
-                s[2] = e_utf8_m(c, 6 * 3);
-                s[3] = e_utf8_m(c, 6 * 2);
-                s[4] = e_utf8_m(c, 6 * 1);
-                s[5] = e_utf8_m(c, 6 * 0);
+                s[1] = e_utf8_m(c, 4);
+                s[2] = e_utf8_m(c, 3);
+                s[3] = e_utf8_m(c, 2);
+                s[4] = e_utf8_m(c, 1);
+                s[5] = e_utf8_m(c, 0);
                 s[6] = 0;
                 return 6;
             }
-            s[0] = '?';
+            s[0] = u8'?';
             s[1] = 0;
             return 1;
         }
@@ -100,12 +100,12 @@ namespace encoding {
         [[nodiscard]] inline bool is_utf8_6(char8_t const c) noexcept { return (c & 0xfeui8) == 0xfcui8; }
         [[nodiscard]] inline bool is_utf8_m(char8_t const c) noexcept { return (c & 0xc0ui8) == 0x80ui8; }
 
-        [[nodiscard]] inline char32_t d_utf8_2(char8_t const c) noexcept { return (c & 0x1fui32) << 6; }
-        [[nodiscard]] inline char32_t d_utf8_3(char8_t const c) noexcept { return (c & 0x0fui32) << 12; }
-        [[nodiscard]] inline char32_t d_utf8_4(char8_t const c) noexcept { return (c & 0x07ui32) << 18; }
-        [[nodiscard]] inline char32_t d_utf8_5(char8_t const c) noexcept { return (c & 0x03ui32) << 24; }
-        [[nodiscard]] inline char32_t d_utf8_6(char8_t const c) noexcept { return (c & 0x01ui32) << 30; }
-        [[nodiscard]] inline char32_t d_utf8_m(char8_t const c, int shift) noexcept { return (c & 0x3fui32) << shift; }
+        [[nodiscard]] inline char32_t d_utf8_2(char8_t const c) noexcept { return (c & 0x1fui32) << (6 * 1); }
+        [[nodiscard]] inline char32_t d_utf8_3(char8_t const c) noexcept { return (c & 0x0fui32) << (6 * 2); }
+        [[nodiscard]] inline char32_t d_utf8_4(char8_t const c) noexcept { return (c & 0x07ui32) << (6 * 3); }
+        [[nodiscard]] inline char32_t d_utf8_5(char8_t const c) noexcept { return (c & 0x03ui32) << (6 * 4); }
+        [[nodiscard]] inline char32_t d_utf8_6(char8_t const c) noexcept { return (c & 0x01ui32) << (6 * 5); }
+        [[nodiscard]] inline char32_t d_utf8_m(char8_t const c, int const unit) noexcept { return (c & 0x3fui32) << (6 * unit); }
 
         [[nodiscard]] inline size_t utf8_to_utf32(char8_t const* const s, size_t const n, char32_t& c, bool const extended = false) noexcept {
             if (is_utf8_1(s[0])) {
@@ -120,25 +120,25 @@ namespace encoding {
             }
             else if (n >= 3 && is_utf8_3(s[0])) {
                 if (is_utf8_m(s[1]) && is_utf8_m(s[2])) {
-                    c = d_utf8_3(s[0]) | d_utf8_m(s[1], 6) | d_utf8_m(s[2], 0);
+                    c = d_utf8_3(s[0]) | d_utf8_m(s[1], 1) | d_utf8_m(s[2], 0);
                     return 3;
                 }
             }
             else if (n >= 4 && is_utf8_4(s[0])) {
                 if (is_utf8_m(s[1]) && is_utf8_m(s[2]) && is_utf8_m(s[3])) {
-                    c = d_utf8_4(s[0]) | d_utf8_m(s[1], 12) | d_utf8_m(s[2], 6) | d_utf8_m(s[3], 0);
+                    c = d_utf8_4(s[0]) | d_utf8_m(s[1], 2) | d_utf8_m(s[2], 1) | d_utf8_m(s[3], 0);
                     return 4;
                 }
             }
             else if (extended && n >= 5 && is_utf8_5(s[0])) {
                 if (is_utf8_m(s[1]) && is_utf8_m(s[2]) && is_utf8_m(s[3]) && is_utf8_m(s[4])) {
-                    c = d_utf8_5(s[0]) | d_utf8_m(s[1], 18) | d_utf8_m(s[2], 12) | d_utf8_m(s[3], 6) | d_utf8_m(s[4], 0);
+                    c = d_utf8_5(s[0]) | d_utf8_m(s[1], 3) | d_utf8_m(s[2], 2) | d_utf8_m(s[3], 1) | d_utf8_m(s[4], 0);
                     return 5;
                 }
             }
             else if (extended && n >= 6 && is_utf8_6(s[0])) {
                 if (is_utf8_m(s[1]) && is_utf8_m(s[2]) && is_utf8_m(s[3]) && is_utf8_m(s[4]) && is_utf8_m(s[5])) {
-                    c = d_utf8_6(s[0]) | d_utf8_m(s[1], 24) | d_utf8_m(s[2], 18) | d_utf8_m(s[3], 12) | d_utf8_m(s[4], 6) | d_utf8_m(s[5], 0);
+                    c = d_utf8_6(s[0]) | d_utf8_m(s[1], 4) | d_utf8_m(s[2], 3) | d_utf8_m(s[3], 2) | d_utf8_m(s[4], 1) | d_utf8_m(s[5], 0);
                     return 6;
                 }
             }
@@ -154,13 +154,11 @@ namespace encoding {
         }
 
         [[nodiscard]] inline size_t utf16_to_utf32(char16_t const* const s, size_t const n, char32_t& c) {
-            if (n >= 2 && is_utf16_h(s[0])) {
-                if (is_utf16_l(s[1])) {
-                    c = utf16_to_utf32(s[0], s[1]);
-                    return 2;
-                }
+            if (n >= 2 && is_utf16_h(s[0]) && is_utf16_l(s[1])) {
+                c = utf16_to_utf32(s[0], s[1]);
+                return 2;
             }
-            else if (!is_utf16_l(s[0])) {
+            if (!is_utf16_h(s[0]) && !is_utf16_l(s[0])) {
                 c = s[0];
                 return 1;
             }
