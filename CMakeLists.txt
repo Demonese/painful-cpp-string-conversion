@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(painful-cpp-string-conversion VERSION 2.0.0 DESCRIPTION "Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?" LANGUAGES CXX)
 
+option(PAINFUL_CPP_STRING_CONVERSION_ENABLE_TOOL "Enable tool (encoding-converter)" ON)
 option(PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST "Enable test" OFF)
 
 set(LIB_NAME painful-cpp-string-conversion)
@@ -9,6 +10,17 @@ set(TEST_NAME painful-cpp-string-conversion-test)
 add_library(${LIB_NAME} INTERFACE)
 set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER include/encoding/string.hpp)
 target_include_directories(${LIB_NAME} INTERFACE include)
+
+if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TOOL)
+    # encoding-converter
+    add_executable(encoding-converter)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_options(encoding-converter PRIVATE "/utf-8")
+    endif ()
+    target_compile_features(encoding-converter PRIVATE cxx_std_20)
+    target_sources(encoding-converter PRIVATE tool/encoding-converter.cpp)
+    target_link_libraries(encoding-converter PRIVATE ${LIB_NAME})
+endif ()
 
 if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
     add_library(simdutf STATIC)
