@@ -1,7 +1,6 @@
 #include "encoding/string.hpp"
 #include "simdutf.h"
 
-#include <iostream>
 #include <format>
 #include <stdexcept>
 
