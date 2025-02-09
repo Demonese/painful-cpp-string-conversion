@@ -6,10 +6,14 @@
 #ifndef PAINFUL_CPP_STRING_CONVERSION_ENCODING_STRING_H
 #define PAINFUL_CPP_STRING_CONVERSION_ENCODING_STRING_H
 
+#ifndef PAINFUL_CPP_STRING_CONVERSION_NAMESPACE
+#define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE ext
+#endif
+
 #include <string>
 #include <string_view>
 
-namespace encoding {
+namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     // Does the compiler parse the source file with the correct encoding (utf-8) ?
     // If you are using MSVC compiler, please remember to add /utf-8 compile option.
     static_assert(sizeof("Ω") == 3 && ("Ω")[0] == '\xCE' && ("Ω")[1] == '\xA9');

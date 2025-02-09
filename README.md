@@ -8,11 +8,11 @@ Why the conversion between C++ string/wstring/u8string/u16string/u32string so pa
 
 You can convert strings through the following API:
 
-* `encoding::to_string`
-* `encoding::to_u8string`
-* `encoding::to_u16string`
-* `encoding::to_u32string`
-* `encoding::to_wstring`
+* `ext::to_string`
+* `ext::to_u8string`
+* `ext::to_u16string`
+* `ext::to_u32string`
+* `ext::to_wstring`
 
 ```c++
 #include <iostream>
@@ -24,6 +24,13 @@ int main() {
   std::wcout << encoding::to_wstring("Hello world!"sv) << std::endl;
   return 0;
 }
+```
+
+You can customize namespace:
+
+```c++
+#define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
+#include <encoding/string.hpp>
 ```
 
 ## Conversion matrix
