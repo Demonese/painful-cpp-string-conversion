@@ -8,20 +8,21 @@ Why the conversion between C++ string/wstring/u8string/u16string/u32string so pa
 
 You can convert strings through the following API:
 
-* `ext::to_string`
-* `ext::to_u8string`
-* `ext::to_u16string`
-* `ext::to_u32string`
-* `ext::to_wstring`
+* `ext::convert<std::string>`
+* `ext::convert<std::u8string>`
+* `ext::convert<std::u16string>`
+* `ext::convert<std::u32string>`
+* `ext::convert<std::wstring>`
 
 ```c++
 #include <iostream>
-#include <ext/string.hpp>
+#include <ext/convert.hpp>
+#include <ext/convert_windows_.hpp>
 
 using std::string_view_literals::operator""sv;
 
 int main() {
-  std::wcout << ext::to_wstring("Hello world!"sv) << std::endl;
+  std::wcout << ext::convert<std::wstring>("Hello world!"sv) << std::endl;
   return 0;
 }
 ```
@@ -30,7 +31,8 @@ You can customize namespace:
 
 ```c++
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
-#include <ext/string.hpp>
+#include <ext/convert.hpp>
+#include <ext/convert_windows_.hpp>
 ```
 
 ## Conversion matrix
