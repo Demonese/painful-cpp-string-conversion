@@ -32,8 +32,8 @@ int main() {
         rt_assert_true(std::memcmp(s.data(), u8.data(), sizeof(char8_t) * s.size()) == 0);
         rt_assert_true(std::memcmp(w.data(), u16.data(), sizeof(char16_t) * s.size()) == 0);
         if (ext::details::is_utf16_h(c) || ext::details::is_utf16_l(c)) {
-            rt_assert_true(std::string_view(c_s, c_s_n) == ""sv);
-            rt_assert_true(std::u16string_view(u16_s, u16_s_n) == u""sv);
+            rt_assert_true(std::string_view(c_s, c_s_n).empty());
+            rt_assert_true(std::u16string_view(u16_s, u16_s_n).empty());
             rt_assert_true("?"sv == s);
             rt_assert_true(u"?"sv == u16);
         }
