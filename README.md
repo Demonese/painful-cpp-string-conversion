@@ -17,7 +17,7 @@ You can convert strings through the following API:
 ```c++
 #include <iostream>
 #include <ext/convert.hpp>
-#include <ext/convert_windows_.hpp>
+#include <ext/convert_windows.hpp>
 
 using std::string_view_literals::operator""sv;
 
@@ -32,7 +32,7 @@ You can customize namespace:
 ```c++
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
 #include <ext/convert.hpp>
-#include <ext/convert_windows_.hpp>
+#include <ext/convert_windows.hpp>
 ```
 
 ## Conversion matrix
