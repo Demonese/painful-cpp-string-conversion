@@ -8,6 +8,7 @@
 #ifndef PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H
 #define PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 

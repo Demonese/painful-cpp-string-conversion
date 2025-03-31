@@ -1,132 +1,168 @@
 {
-  "version": 6,
-  "configurePresets": [
-    {
-      "name": "cpm-cache",
-      "hidden": true,
-      "cacheVariables": {
-        "CPM_SOURCE_CACHE": {
-          "type": "PATH",
-          "value": "${sourceDir}/build/packages"
-        },
-        "PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST": {
-          "type": "BOOLEAN",
-          "value": "TRUE"
-        }
-      }
-    },
-    {
-      "name": "vs2022",
-      "hidden": true,
-      "inherits": [
-        "cpm-cache"
-      ],
-      "generator": "Visual Studio 17 2022"
-    },
-    {
-      "name": "vs2022-x86",
-      "inherits": [
-        "vs2022"
-      ],
-      "architecture": "Win32",
-      "binaryDir": "${sourceDir}/build/x86"
-    },
-    {
-      "name": "vs2022-amd64",
-      "inherits": [
-        "vs2022"
-      ],
-      "architecture": "x64",
-      "binaryDir": "${sourceDir}/build/amd64"
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "debug",
-      "hidden": true,
-      "configuration": "Debug"
-    },
-    {
-      "name": "release",
-      "hidden": true,
-      "configuration": "Release"
-    },
-    {
-      "name": "windows-x86",
-      "hidden": true,
-      "configurePreset": "vs2022-x86"
-    },
-    {
-      "name": "windows-amd64",
-      "hidden": true,
-      "configurePreset": "vs2022-amd64"
-    },
-    {
-      "name": "target-test",
-      "hidden": true,
-      "targets": [
-        "painful-cpp-string-conversion-test"
-      ]
-    },
-    {
-      "name": "windows-x86-debug",
-      "inherits": [
-        "windows-x86",
-        "debug",
-        "target-test"
-      ]
-    },
-    {
-      "name": "windows-x86-release",
-      "inherits": [
-        "windows-x86",
-        "release",
-        "target-test"
-      ]
-    },
-    {
-      "name": "windows-amd64-debug",
-      "inherits": [
-        "windows-amd64",
-        "debug",
-        "target-test"
-      ]
-    },
-    {
-      "name": "windows-amd64-release",
-      "inherits": [
-        "windows-amd64",
-        "release",
-        "target-test"
-      ]
-    }
-  ],
-  "workflowPresets": [
-    {
-      "name": "windows-x86-release",
-      "steps": [
+    "version": 6,
+    "configurePresets": [
         {
-          "type": "configure",
-          "name": "vs2022-x86"
+            "name": "cpm-cache",
+            "hidden": true,
+            "cacheVariables": {
+                "CPM_SOURCE_CACHE": {
+                    "type": "PATH",
+                    "value": "${sourceDir}/build/packages"
+                },
+                "PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST": {
+                    "type": "BOOLEAN",
+                    "value": "TRUE"
+                }
+            }
         },
         {
-          "type": "build",
-          "name": "windows-x86-release"
-        }
-      ]
-    },
-    {
-      "name": "windows-amd64-release",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "vs2022-amd64"
+            "name": "vs2022",
+            "hidden": true,
+            "inherits": [
+                "cpm-cache"
+            ],
+            "generator": "Visual Studio 17 2022"
         },
         {
-          "type": "build",
-          "name": "windows-amd64-release"
+            "name": "vs2022-x86",
+            "inherits": [
+                "vs2022"
+            ],
+            "architecture": "Win32",
+            "binaryDir": "${sourceDir}/build/x86"
+        },
+        {
+            "name": "vs2022-amd64",
+            "inherits": [
+                "vs2022"
+            ],
+            "architecture": "x64",
+            "binaryDir": "${sourceDir}/build/amd64"
+        },
+        {
+            "name": "ninja",
+            "hidden": true,
+            "inherits": [
+                "cpm-cache"
+            ],
+            "generator": "Ninja"
+        },
+        {
+            "name": "ninja-amd64",
+            "inherits": [
+                "ninja"
+            ],
+            "binaryDir": "${sourceDir}/build/amd64"
         }
-      ]
-    }
-  ]
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "hidden": true,
+            "configuration": "Debug"
+        },
+        {
+            "name": "release",
+            "hidden": true,
+            "configuration": "Release"
+        },
+        {
+            "name": "windows-x86",
+            "hidden": true,
+            "configurePreset": "vs2022-x86"
+        },
+        {
+            "name": "windows-amd64",
+            "hidden": true,
+            "configurePreset": "vs2022-amd64"
+        },
+        {
+            "name": "target-test",
+            "hidden": true,
+            "targets": [
+                "painful-cpp-string-conversion-test"
+            ]
+        },
+        {
+            "name": "windows-x86-debug",
+            "inherits": [
+                "windows-x86",
+                "debug",
+                "target-test"
+            ]
+        },
+        {
+            "name": "windows-x86-release",
+            "inherits": [
+                "windows-x86",
+                "release",
+                "target-test"
+            ]
+        },
+        {
+            "name": "windows-amd64-debug",
+            "inherits": [
+                "windows-amd64",
+                "debug",
+                "target-test"
+            ]
+        },
+        {
+            "name": "windows-amd64-release",
+            "inherits": [
+                "windows-amd64",
+                "release",
+                "target-test"
+            ]
+        },
+        {
+            "name": "ninja-amd64",
+            "hidden": true,
+            "configurePreset": "ninja-amd64"
+        },
+        {
+            "name": "ninja-amd64-debug",
+            "inherits": [
+                "ninja-amd64",
+                "debug",
+                "target-test"
+            ]
+        },
+        {
+            "name": "ninja-amd64-release",
+            "inherits": [
+                "ninja-amd64",
+                "release",
+                "target-test"
+            ]
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "windows-x86-release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "vs2022-x86"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x86-release"
+                }
+            ]
+        },
+        {
+            "name": "windows-amd64-release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "vs2022-amd64"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-amd64-release"
+                }
+            ]
+        }
+    ]
 }
