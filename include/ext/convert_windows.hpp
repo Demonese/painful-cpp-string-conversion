@@ -73,7 +73,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
+    template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string_view const& s) {
         std::wstring buffer;
         auto p = reinterpret_cast<char8_t const*>(s.data());
         size_t n = s.size();
@@ -92,22 +92,8 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string_view const& s) {
-        std::wstring buffer;
-        auto p = reinterpret_cast<char8_t const*>(s.data());
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char16_t t[4]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
-        }
-        return buffer;
+    template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::wstring>(std::string_view(s));
     }
 
     template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
@@ -129,21 +115,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        std::wstring buffer;
-        char8_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char16_t t[4]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::wstring>(std::u8string_view(s));
     }
 
     template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string_view const& s) {
@@ -166,14 +138,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::wstring PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        std::wstring buffer;
-        char16_t t[4]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(reinterpret_cast<std::wstring::const_pointer>(t), m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::wstring>(std::u32string_view(s));
     }
 }
 
