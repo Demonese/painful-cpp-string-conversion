@@ -26,26 +26,34 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
         return { reinterpret_cast<std::wstring_view::const_pointer>(s.data()), s.size() };
     }
 
+    template<> inline std::wstring_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::u16string const& s) {
+        return { reinterpret_cast<std::wstring_view::const_pointer>(s.data()), s.size() };
+    }
+
     template<> inline std::u16string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring_view const& s) {
+        return { reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size() };
+    }
+
+    template<> inline std::u16string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring const& s) {
         return { reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size() };
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring_view const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::string>(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::string>(PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u16string_view>(s));
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::string>(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::string>(PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u16string_view>(s));
     }
 
     template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring_view const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u8string>(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u8string>(PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u16string_view>(s));
     }
 
     template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u8string>(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u8string>(PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u16string_view>(s));
     }
 
     template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring_view const& s) {
@@ -57,11 +65,11 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring_view const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u32string>(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u32string>(PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u16string_view>(s));
     }
 
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::wstring const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u32string>(std::u16string_view(reinterpret_cast<std::u16string_view::const_pointer>(s.data()), s.size()));
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u32string>(PAINFUL_CPP_STRING_CONVERSION_FUNCTION <std::u16string_view>(s));
     }
 
     // Always assume that the std::string stores text encoded in UTF-8

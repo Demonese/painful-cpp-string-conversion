@@ -202,7 +202,17 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
+    template<> inline std::string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::u8string const& s) {
+        return { reinterpret_cast<std::string_view::const_pointer>(s.data()), s.size() };
+    }
+
+    // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::u8string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::string_view const& s) {
+        return { reinterpret_cast<std::u8string_view::const_pointer>(s.data()), s.size() };
+    }
+
+    // Always assume that the std::string stores text encoded in UTF-8
+    template<> inline std::u8string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION (std::string const& s) {
         return { reinterpret_cast<std::u8string_view::const_pointer>(s.data()), s.size() };
     }
 
