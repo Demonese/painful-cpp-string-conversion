@@ -249,21 +249,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 
     // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string const& s) {
-        std::string buffer;
-        char16_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char8_t t[8]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf16_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::string>(std::u16string_view(s));
     }
 
     // Always assume that the std::string stores text encoded in UTF-8
@@ -280,14 +266,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 
     // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        std::string buffer;
-        char8_t t[8]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::string>(std::u32string_view(s));
     }
 
     // std::u8string
@@ -321,21 +300,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string const& s) {
-        std::u8string buffer;
-        char16_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char8_t t[8]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf16_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u8string>(std::u16string_view(s));
     }
 
     template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string_view const& s) {
@@ -350,14 +315,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        std::u8string buffer;
-        char8_t t[8]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u8string>(std::u32string_view(s));
     }
 
     // std::u16string
@@ -383,21 +341,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 
     // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
-        std::u16string buffer;
-        auto p = reinterpret_cast<char8_t const*>(s.data());
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char16_t t[4]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u16string>(std::string_view(s));
     }
 
     template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
@@ -419,21 +363,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        std::u16string buffer;
-        char8_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char16_t t[4]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u16string>(std::u8string_view(s));
     }
 
     template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string_view const& s) {
@@ -448,14 +378,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        std::u16string buffer;
-        char16_t t[4]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u16string>(std::u32string_view(s));
     }
 
     // std::u32string
@@ -478,18 +401,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 
     // Always assume that the std::string stores text encoded in UTF-8
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
-        std::u32string buffer;
-        auto p = reinterpret_cast<char8_t const*>(s.data());
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            buffer.push_back(c);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u32string>(std::string_view(s));
     }
 
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
@@ -508,18 +420,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        std::u32string buffer;
-        char8_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            buffer.push_back(c);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u32string>(std::u8string_view(s));
     }
 
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string_view const& s) {
@@ -538,18 +439,7 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
     }
 
     template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string const& s) {
-        std::u32string buffer;
-        char16_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        while (n > 0) {
-            o = details::utf16_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            buffer.push_back(c);
-        }
-        return buffer;
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u32string>(std::u16string_view(s));
     }
 }
 
