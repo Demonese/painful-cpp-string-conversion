@@ -26,7 +26,7 @@ if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
 
     add_executable(${TEST_NAME})
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        target_compile_options(${TEST_NAME} PRIVATE "/utf-8")
+        target_compile_options(${TEST_NAME} PRIVATE "/utf-8" "/sdl" "/W4")
     endif ()
     target_compile_features(${TEST_NAME} PRIVATE cxx_std_20)
     target_sources(${TEST_NAME} PRIVATE test/test.cpp)
