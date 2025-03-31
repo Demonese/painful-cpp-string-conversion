@@ -27,10 +27,11 @@ int main() {
 }
 ```
 
-你可以自定义命名空间：
+你可以自定义命名空间和函数名称：
 
 ```c++
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
+#define PAINFUL_CPP_STRING_CONVERSION_FUNCTION  bar
 #include <ext/convert.hpp>
 #include <ext/convert_windows.hpp>
 ```

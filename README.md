@@ -27,10 +27,11 @@ int main() {
 }
 ```
 
-You can customize namespace:
+You can customize namespace and function name:
 
 ```c++
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
+#define PAINFUL_CPP_STRING_CONVERSION_FUNCTION  bar
 #include <ext/convert.hpp>
 #include <ext/convert_windows.hpp>
 ```
