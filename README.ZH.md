@@ -66,7 +66,7 @@ int main() {
 
 ## `char` 类型以及它的衍生物
 
-C/C++ 语言中的字符和字符串主要由 `char` 字符类型，以及其组成的字符数组或字符串类型表示民，所有需要和文本打交道的地方都能看到它的身影。
+C/C++ 语言中的字符和字符串主要由 `char` 字符类型，以及其组成的字符数组或字符串类型表示，所有需要和文本打交道的地方都能看到它的身影。
 
 但是它存在大量的问题：
 
@@ -101,19 +101,19 @@ C 标准还提供了宽字符类型 `wchar_t`，用于表示“本机编码（na
 [GNU官方文档表示 `wchar_t` 纯粹是毫无意义的垃圾，不应该使用。](https://www.gnu.org/software//gnulib/manual/html_node/The-wchar_005ft-type.html)
 
 > Unfortunately, this API and its implementation has numerous problems:
-> 
+>
 > * On Windows platforms and on AIX in 32-bit mode, `wchar_t` is a 16-bit type. This means that it can never accommodate an entire Unicode character. Either the `wchar_t *` strings are limited to characters in UCS-2 (the “Basic Multilingual Plane” of Unicode), or – if `wchar_t *` strings are encoded in UTF-16 – a `wchar_t` represents only half of a character in the worst case, making the `<wctype.h>` functions pointless.
 > * On Solaris and FreeBSD, the `wchar_t` encoding is locale dependent and undocumented. This means, if you want to know any property of a `wchar_t` character, other than the properties defined by `<wctype.h>` – such as whether it’s a dash, currency symbol, paragraph separator, or similar –, you have to convert it to `char *` encoding first, by use of the function `wctomb`.
 > * When you read a stream of wide characters, through the functions `fgetwc` and `fgetws`, and when the input stream/file is not in the expected encoding, you have no way to determine the invalid byte sequence and do some corrective action. If you use these functions, your program becomes “garbage in - more garbage out” or “garbage in - abort”.
-> 
-> As a consequence, it is better to use multibyte strings. Such multibyte strings can bypass limitations of the `wchar_t` type, if you use functions defined in Gnulib and GNU libunistring for text processing. They can also faithfully transport malformed characters that were present in the input, without requiring the program to **produce garbage** or abort.  
+>
+> As a consequence, it is better to use multibyte strings. Such multibyte strings can bypass limitations of the `wchar_t` type, if you use functions defined in Gnulib and GNU libunistring for text processing. They can also faithfully transport malformed characters that were present in the input, without requiring the program to **produce garbage** or abort.
 
 > 遗憾的是，此 API 及其实现存在许多问题：
-> 
+>
 > * 在 Windows 平台和 32 位模式的 AIX 上，`wchar_t` 是一种16位类型。这意味着它永远无法容纳整个 Unicode 字符。要么 `wchar_t *` 字符串仅限于UCS-2（Unicode 的“基本多语言平面”）中的字符，要么——如果 `wchar_t *` 字符串以 UTF-16 编码——在最坏的情况下，`wchar_t` 只代表字符的一半，使得 `<wctype.h>` 函数毫无意义。
 > * 在 Solaris 和 FreeBSD 上，`wchar_t` 编码依赖于区域设置，并且没有文档说明。这意味着，如果你想知道 `wchar_t` 字符的任何属性——例如它是破折号、货币符号、段落分隔符还是类似的属性——而不是 `<wctype.h>` 定义的属性，你必须首先使用函数 `wctomb` 将其转换为 `char *` 编码。
 > * 当您通过函数 `fgetwc` 和 `fgetws` 读取宽字符流时，并且当输入流/文件不是预期的编码时，您无法确定无效的字节序列并采取一些纠正措施。如果你使用这些函数，你的程序就会变成“垃圾输入-更多垃圾输出”或“垃圾输入——崩溃”。
-> 
+>
 > 因此，最好使用多字节字符串。如果您使用 Gnulib 和 GNU libunistring 中定义的函数进行文本处理，则此类多字节字符串可以绕过 `wchar_t` 类型的限制。它们还可以忠实地传输输入中存在的格式错误的字符，而不需要程序**产生垃圾**或崩溃”。
 
 从 C11 开始标准库中新增了 `char16_t` 和 `char32_t`；从 C23 开始 `char8_t` 也加入了标准库。以下是配套的 API：
@@ -131,19 +131,19 @@ C 标准还提供了宽字符类型 `wchar_t`，用于表示“本机编码（na
 而 C 标准对这些 API 的解释耐人寻味，比如 `c32rtomb`：
 
 > Converts a single code point from its variable-length 32-bit wide character representation (but typically, UTF-32) to its narrow multibyte character representation.
-> 
+>
 > ...
-> 
+>
 > If the macro `__STDC_UTF_32__` is defined, the 32-bit encoding used by this function is UTF-32; otherwise, it is implementation-defined. In any case, the multibyte character encoding used by this function is specified by the currently active C locale.
-> 
+>
 > (since C23) The macro is always defined and the encoding is always UTF-32.
 
 > 将单个码点从其可变长度 32 位宽字符表示形式（但通常为 UTF-32）转换为其窄多字节字符表示形式。
-> 
+>
 > ...
-> 
+>
 > 如果定义了宏 `__STDC_UTF_32__`，则此函数使用的 32 位编码为 UTF-32；否则，它是实现定义的。在任何情况下，此函数使用的多字节字符编码都是由当前活动的C语言环境指定的。
-> 
+>
 > （从 C23 开始）宏始终被定义，编码始终为 UTF-32。
 
 C 标准委员会一开始的思路竟然是仅把 `char32_t` 当作一个 32 位可变长度字符类型，并不关心编码是什么，也不关心开发者会如何使用它，直到 C23 才后知后觉地强制它的编码为 UTF-32，填补了这个天坑。
