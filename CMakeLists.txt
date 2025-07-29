@@ -12,7 +12,7 @@ set(LIB_PUBLIC_HEADERS
     include/ext/convert_windows.hpp
     include/ext/string_literals_encoding_compile_time_check.hpp
 )
-set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER LIB_PUBLIC_HEADERS)
+set_target_properties(${LIB_NAME} PROPERTIES PUBLIC_HEADER ${LIB_PUBLIC_HEADERS})
 target_include_directories(${LIB_NAME} INTERFACE include)
 
 if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
