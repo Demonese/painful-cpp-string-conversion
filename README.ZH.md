@@ -168,7 +168,7 @@ C++ 是 C 的超集，上一节提到的所有问题 C++ 都完整地继承了�
     * `std::codecvt_utf16` (C++11) (deprecated in C++17) (removed in C++26)
     * `std::codecvt_utf8_utf16` (C++11) (deprecated in C++17) (removed in C++26)
 
-尴尬的是这些类全都被弃用（deprecated）了，甚至还有 `char8_t` 相关的 `std::codecvt` 进标准就立即宣布弃用的神经操作。被弃用的下一个解决就是被移除（removed），可以看到在 C++26 标准中上面列出的类大部分都会被移除。
+尴尬的是这些类全都被弃用（deprecated）了，甚至还出现了 `char8_t` 相关的 `std::codecvt` 实现刚进标准库就立即宣布弃用的神经操作。被弃用后，接下来就是被移除（removed），可以看到在 C++26 标准中上面列出的类大部分都会被移除。
 
 有得必有失，C++ 标准委员既然胆敢在 C++26 移除这些类，想必会有更好用的工具加入标准库吧？
 
