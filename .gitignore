@@ -1,8 +1,10 @@
-.vs*
-.idea*
-.clion*
-.vscode*
+# IDE
+/.vs/*
+/.idea/*
+/.vscode/*
+/.cache/*
 
-build*
-cmake-build*
-out*
+# Build
+/build
+/cmake-build*
+/out*
