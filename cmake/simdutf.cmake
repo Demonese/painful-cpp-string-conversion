@@ -1,0 +1,32 @@
+set(SIMDUTF_LOG  "simdutf --")
+set(SIMDUTF_URL  https://github.com/simdutf/simdutf/releases/download/v7.3.3/singleheader.zip)
+set(SIMDUTF_HASH ebe033a48a3ea4a46205710f3dfdc98587dae3f9937d00d509773798b8243e60) # sha256
+set(SIMDUTF_PATH ${CMAKE_BINARY_DIR}/simdutf.zip)
+set(SIMDUTF_ROOT ${CMAKE_BINARY_DIR}/simdutf)
+
+if (NOT EXISTS ${SIMDUTF_PATH})
+    message(STATUS "${SIMDUTF_LOG} ${SIMDUTF_PATH} not found, download from ${SIMDUTF_URL}...")
+    file(DOWNLOAD ${SIMDUTF_URL} ${SIMDUTF_PATH} SHOW_PROGRESS EXPECTED_HASH SHA256=${SIMDUTF_HASH})
+    if (NOT EXISTS ${SIMDUTF_PATH})
+        message(FATAL_ERROR "${SIMDUTF_LOG} download ${SIMDUTF_URL} failed")
+    endif ()
+endif ()
+
+file(SHA256 ${SIMDUTF_PATH} SIMDUTF_HASH_REAL)
+string(TOLOWER ${SIMDUTF_HASH_REAL} SIMDUTF_HASH_REAL)
+if (NOT (${SIMDUTF_HASH} STREQUAL ${SIMDUTF_HASH_REAL}))
+    file(REMOVE ${SIMDUTF_PATH})
+    message(FATAL_ERROR "${SIMDUTF_LOG} downloaded ${SIMDUTF_PATH} verify failed")
+endif ()
+
+if (NOT EXISTS ${SIMDUTF_ROOT})
+    file(ARCHIVE_EXTRACT INPUT ${SIMDUTF_PATH} DESTINATION ${SIMDUTF_ROOT})
+endif ()
+
+add_library(simdutf STATIC)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(simdutf PRIVATE "/utf-8")
+endif ()
+target_compile_features(simdutf PRIVATE cxx_std_17)
+target_include_directories(simdutf PUBLIC ${SIMDUTF_ROOT})
+target_sources(simdutf PRIVATE ${SIMDUTF_ROOT}/simdutf.h ${SIMDUTF_ROOT}/simdutf.cpp)
