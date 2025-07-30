@@ -23,4 +23,8 @@ if (PAINFUL_CPP_STRING_CONVERSION_ENABLE_TEST)
     target_compile_features(${TEST_NAME} PRIVATE cxx_std_17)
     target_sources(${TEST_NAME} PRIVATE test/test.cpp)
     target_link_libraries(${TEST_NAME} PRIVATE ${LIB_NAME} simdutf)
+
+    include(CTest)
+
+    add_test(NAME test-all COMMAND $<TARGET_FILE:${TEST_NAME}>)
 endif ()
