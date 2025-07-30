@@ -262,13 +262,13 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
                     s_ptr += n;
                     s_len -= n;
                 }
-                else if constexpr (std::is_same_v<typename Source::value_type, char32_t>) {
+                else if constexpr (details::is_char32_type_v<typename Source::value_type>) {
                     c32 = s_ptr[0];
                     s_ptr++;
                     s_len--;
                 }
                 else {
-                    static_assert(false, "unsupported type");
+                    static_assert(details::is_supported_char_type_v<typename Source::value_type>, "unsupported type");
                 }
                 // encode
                 if constexpr (details::is_char8_type_v<typename Target::value_type>) {
@@ -281,11 +281,11 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
                     auto const n = details::utf32_to_utf16(c32, c16);
                     d.append(c16, n);
                 }
-                else if constexpr (std::is_same_v<typename Target::value_type, char32_t>) {
+                else if constexpr (details::is_char32_type_v<typename Target::value_type>) {
                     d.push_back(c32);
                 }
                 else {
-                    static_assert(false, "unsupported type");
+                    static_assert(details::is_supported_char_type_v<typename Target::value_type>, "unsupported type");
                 }
             }
             return d;
