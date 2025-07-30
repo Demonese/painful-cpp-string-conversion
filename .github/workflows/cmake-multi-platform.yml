@@ -5,8 +5,20 @@ name: CMake on multiple platforms
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '.editorconfig'
+      - '.gitignore'
+      - 'CMakePresets.json'
+      - 'LICENSE'
+      - 'README*'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '.editorconfig'
+      - '.gitignore'
+      - 'CMakePresets.json'
+      - 'LICENSE'
+      - 'README*'
 
 jobs:
   build:
