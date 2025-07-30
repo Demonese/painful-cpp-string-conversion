@@ -31,6 +31,8 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 
 #ifdef _WIN32
     static_assert(sizeof(wchar_t) == sizeof(char16_t), "unsupported wchar_t type");
+#else // _WIN32
+    static_assert(sizeof(wchar_t) == sizeof(char32_t), "unsupported wchar_t type");
 #endif // _WIN32
 
     namespace details {
@@ -45,13 +47,14 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 #ifdef _WIN32
         template<typename T>
         constexpr bool is_char16_type_v = std::is_same_v<T, uint16_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, wchar_t>;
+        template<typename T>
+        constexpr bool is_char32_type_v = std::is_same_v<T, uint32_t> || std::is_same_v<T, char32_t>;
 #else // _WIN32
         template<typename T>
         constexpr bool is_char16_type_v = std::is_same_v<T, uint16_t> || std::is_same_v<T, char16_t>;
-#endif // _WIN32
-
         template<typename T>
-        constexpr bool is_char32_type_v = std::is_same_v<T, uint32_t> || std::is_same_v<T, char32_t>;
+        constexpr bool is_char32_type_v = std::is_same_v<T, uint32_t> || std::is_same_v<T, char32_t> || std::is_same_v<T, wchar_t>;
+#endif // _WIN32
 
         template<typename T>
         constexpr bool is_supported_char_type_v = is_char8_type_v<T> || is_char16_type_v<T> || is_char32_type_v<T>;
