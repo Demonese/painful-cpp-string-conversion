@@ -12,6 +12,7 @@
 #include <climits>
 #include <cstdint>
 #include <type_traits>
+#include <string_view>
 
 #ifndef PAINFUL_CPP_STRING_CONVERSION_NAMESPACE
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE ext
@@ -290,6 +291,12 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
             }
             return d;
         }
+    }
+
+    template<typename Target, typename InputChar, size_t InputLength>
+    Target PAINFUL_CPP_STRING_CONVERSION_FUNCTION(InputChar const (&s)[InputLength], bool extended = false) {
+        static_assert(InputLength >= 1, "null-terminate is required");
+        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION <Target>(std::basic_string_view<InputChar>{ s, InputLength - 1 }, extended);
     }
 }
 

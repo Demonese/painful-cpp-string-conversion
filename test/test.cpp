@@ -28,6 +28,8 @@ namespace {
     }
 }
 
+using std::string_view_literals::operator ""sv;
+
 int main() {
     for (char32_t c = 0; c <= 0x10'ffff; c++) {
         if (ext::details::is_utf16_h(c) || ext::details::is_utf16_l(c)) {
@@ -193,6 +195,67 @@ int main() {
 
         assert_true(intermediate_string == std::string_view(string_data, string_size));
         assert_true(intermediate_string_utf16 == std::u16string_view(string_data_utf16, string_size_utf16));
+    }
+    {
+#define HELLO_WORLD "Hello world! 你好世界！こんにちは世界！"
+
+        constexpr auto c{HELLO_WORLD ""sv};
+        constexpr auto u8{u8"" HELLO_WORLD ""sv};
+        constexpr auto u16{u"" HELLO_WORLD ""sv};
+        constexpr auto u32{U"" HELLO_WORLD ""sv};
+        constexpr auto w{L"" HELLO_WORLD ""sv};
+
+        auto const c_u8 = ext::convert<std::u8string>(HELLO_WORLD);
+        auto const c_u16 = ext::convert<std::u16string>(HELLO_WORLD);
+        auto const c_u32 = ext::convert<std::u32string>(HELLO_WORLD);
+        auto const c_w = ext::convert<std::wstring>(HELLO_WORLD);
+
+        auto const u8_c = ext::convert<std::string>(u8"" HELLO_WORLD);
+        auto const u8_u16 = ext::convert<std::u16string>(u8"" HELLO_WORLD);
+        auto const u8_u32 = ext::convert<std::u32string>(u8"" HELLO_WORLD);
+        auto const u8_w = ext::convert<std::wstring>(u8"" HELLO_WORLD);
+
+        auto const u16_c = ext::convert<std::string>(u"" HELLO_WORLD);
+        auto const u16_u8 = ext::convert<std::u8string>(u"" HELLO_WORLD);
+        auto const u16_u32 = ext::convert<std::u32string>(u"" HELLO_WORLD);
+        auto const u16_w = ext::convert<std::wstring>(u"" HELLO_WORLD);
+
+        auto const u32_c = ext::convert<std::string>(U"" HELLO_WORLD);
+        auto const u32_u8 = ext::convert<std::u8string>(U"" HELLO_WORLD);
+        auto const u32_u16 = ext::convert<std::u16string>(U"" HELLO_WORLD);
+        auto const u32_w = ext::convert<std::wstring>(U"" HELLO_WORLD);
+
+        auto const w_c = ext::convert<std::string>(L"" HELLO_WORLD);
+        auto const w_u8 = ext::convert<std::u8string>(L"" HELLO_WORLD);
+        auto const w_u16 = ext::convert<std::u16string>(L"" HELLO_WORLD);
+        auto const w_u32 = ext::convert<std::u32string>(L"" HELLO_WORLD);
+
+        assert_true(c == u8_c);
+        assert_true(c == u16_c);
+        assert_true(c == u32_c);
+        assert_true(c == w_c);
+
+#ifdef __cpp_char8_t
+        assert_true(u8 == c_u8);
+        assert_true(u8 == u16_u8);
+        assert_true(u8 == u32_u8);
+        assert_true(u8 == w_u8);
+#endif
+
+        assert_true(u16 == c_u16);
+        assert_true(u16 == u8_u16);
+        assert_true(u16 == u32_u16);
+        assert_true(u16 == w_u16);
+
+        assert_true(u32 == c_u32);
+        assert_true(u32 == u8_u32);
+        assert_true(u32 == u16_u32);
+        assert_true(u32 == w_u32);
+
+        assert_true(w == c_w);
+        assert_true(w == u8_w);
+        assert_true(w == u16_w);
+        assert_true(w == u32_w);
     }
     std::printf("All test pass.\n");
     return 0;
