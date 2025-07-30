@@ -234,9 +234,11 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
 
     template<typename Target, typename Source>
     Target PAINFUL_CPP_STRING_CONVERSION_FUNCTION(Source const& s, bool extended = false) {
-        static_assert(!std::is_same_v<Source, Target>, "unnecessary conversion");
         static_assert(details::is_supported_char_type_v<typename Source::value_type> && details::is_supported_char_type_v<typename Target::value_type>, "unsupported type");
-        if constexpr (std::is_same_v<typename Source::value_type, typename Target::value_type>) {
+        if constexpr (std::is_same_v<Source, Target>) {
+            return s;
+        }
+        else if constexpr (std::is_same_v<typename Source::value_type, typename Target::value_type>) {
             return { s.data(), s.size() };
         }
         else if constexpr ((details::is_char8_type_v<typename Source::value_type> && details::is_char8_type_v<typename Target::value_type>) || (details::is_char16_type_v<typename Source::value_type> && details::is_char16_type_v<typename Target::value_type>)) {
