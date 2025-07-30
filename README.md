@@ -65,5 +65,4 @@ int main() {
 
 * [ ] Supports raw character array as parameter
 * [ ] Supports span or span-like types as parameter
-* [ ] Clean up code and reduce duplication
 * [ ] Supports simdutf as a high-speed conversion implementation
