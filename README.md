@@ -17,12 +17,11 @@ You can convert strings through the following API:
 ```c++
 #include <iostream>
 #include <ext/convert.hpp>
-#include <ext/convert_windows.hpp>
 
 using std::string_view_literals::operator""sv;
 
 int main() {
-  std::wcout << ext::convert<std::wstring>("Hello world!"sv) << std::endl;
+  std::cout << ext::convert<std::string>(U"Hello world!"sv) << std::endl;
   return 0;
 }
 ```
@@ -30,10 +29,17 @@ int main() {
 You can customize namespace and function name:
 
 ```c++
-#define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE foo
-#define PAINFUL_CPP_STRING_CONVERSION_FUNCTION  bar
+#include <iostream>
+#define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE utf
+#define PAINFUL_CPP_STRING_CONVERSION_FUNCTION  as
 #include <ext/convert.hpp>
-#include <ext/convert_windows.hpp>
+
+using std::string_view_literals::operator""sv;
+
+int main() {
+  std::cout << utf::as<std::string>(U"Hello world!"sv) << std::endl;
+  return 0;
+}
 ```
 
 ## Conversion matrix
