@@ -8,89 +8,117 @@
 #ifndef PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H
 #define PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H
 
+#include <climits>
 #include <cstdint>
-#include <string>
-#include <string_view>
+#include <type_traits>
 
 #ifndef PAINFUL_CPP_STRING_CONVERSION_NAMESPACE
 #define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE ext
+#define PAINFUL_CPP_STRING_CONVERSION_NAMESPACE_DEFAULT
 #endif
 
 #ifndef PAINFUL_CPP_STRING_CONVERSION_FUNCTION
 #define PAINFUL_CPP_STRING_CONVERSION_FUNCTION convert
+#define PAINFUL_CPP_STRING_CONVERSION_FUNCTION_DEFAULT
 #endif
 
 namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
-    // We require char to always be 8-bits
-    static_assert(CHAR_BIT == 8);
+    static_assert(CHAR_BIT == 8, "unsupported char type");
 
-    // We consider char and char8_t as the same type
-    static_assert(sizeof(char) == sizeof(char8_t));
+#ifdef __cpp_char8_t
+    static_assert(sizeof(char) == sizeof(char8_t), "unsupported char type");
+#endif // __cpp_char8_t
+
+#ifdef _WIN32
+    static_assert(sizeof(wchar_t) == sizeof(char16_t), "unsupported wchar_t type");
+#endif // _WIN32
 
     namespace details {
-        [[nodiscard]] constexpr uint8_t operator""_u8(unsigned long long int const v) noexcept { return static_cast<uint8_t>(v); }
+#ifdef __cpp_char8_t
+        template<typename T>
+        constexpr bool is_char8_type_v = std::is_same_v<T, char> || std::is_same_v<T, uint8_t> || std::is_same_v<T, char8_t>;
+#else // __cpp_char8_t
+        template<typename T>
+        constexpr bool is_char8_type_v = std::is_same_v<T, char> || std::is_same_v<T, uint8_t>;
+#endif // __cpp_char8_t
 
-        [[nodiscard]] inline bool is_utf8_1(char32_t const c) noexcept { return c <= 0x7fu; }
-        [[nodiscard]] inline bool is_utf8_2(char32_t const c) noexcept { return c > 0x7fu && c <= 0x7ffu; }
-        [[nodiscard]] inline bool is_utf8_3(char32_t const c) noexcept { return c > 0x7ffu && c <= 0xffffu; }
-        [[nodiscard]] inline bool is_utf8_4(char32_t const c) noexcept { return c > 0xffffu && c <= 0x1f'ffffu; }
-        [[nodiscard]] inline bool is_utf8_5(char32_t const c) noexcept { return c > 0x1f'ffffu && c <= 0x3ff'ffffu; }
-        [[nodiscard]] inline bool is_utf8_6(char32_t const c) noexcept { return c > 0x3ff'ffffu && c <= 0x7fff'ffffu; }
+#ifdef _WIN32
+        template<typename T>
+        constexpr bool is_char16_type_v = std::is_same_v<T, uint16_t> || std::is_same_v<T, char16_t> || std::is_same_v<T, wchar_t>;
+#else // _WIN32
+        template<typename T>
+        constexpr bool is_char16_type_v = std::is_same_v<T, uint16_t> || std::is_same_v<T, char16_t>;
+#endif // _WIN32
 
-        [[nodiscard]] inline char8_t e_utf8_1(char32_t const c) noexcept { return c & 0b0111'1111_u8; }
-        [[nodiscard]] inline char8_t e_utf8_2(char32_t const c) noexcept { return 0b1100'0000_u8 | (((c >> (6 * 1)) & 0b0001'1111_u8)); }
-        [[nodiscard]] inline char8_t e_utf8_3(char32_t const c) noexcept { return 0b1110'0000_u8 | (((c >> (6 * 2)) & 0b0000'1111_u8)); }
-        [[nodiscard]] inline char8_t e_utf8_4(char32_t const c) noexcept { return 0b1111'0000_u8 | (((c >> (6 * 3)) & 0b0000'0111_u8)); }
-        [[nodiscard]] inline char8_t e_utf8_5(char32_t const c) noexcept { return 0b1111'1000_u8 | (((c >> (6 * 4)) & 0b0000'0011_u8)); }
-        [[nodiscard]] inline char8_t e_utf8_6(char32_t const c) noexcept { return 0b1111'1100_u8 | (((c >> (6 * 5)) & 0b0000'0001_u8)); }
-        [[nodiscard]] inline char8_t e_utf8_m(char32_t const c, int const unit) noexcept { return 0b1000'0000_u8 | ((c >> (6 * unit)) & 0b0011'1111_u8); }
+        template<typename T>
+        constexpr bool is_char32_type_v = std::is_same_v<T, uint32_t> || std::is_same_v<T, char32_t>;
 
-        [[nodiscard]] inline bool is_utf16_h(char32_t const c) noexcept { return c >= 0xd800u && c <= 0xdbffu; }
-        [[nodiscard]] inline bool is_utf16_l(char32_t const c) noexcept { return c >= 0xdc00u && c <= 0xdfffu; }
+        template<typename T>
+        constexpr bool is_supported_char_type_v = is_char8_type_v<T> || is_char16_type_v<T> || is_char32_type_v<T>;
 
-        [[nodiscard]] inline size_t utf32_to_utf8(char32_t const c, char8_t (&s)[8], bool const extended = false) noexcept {
+        template<typename T> [[nodiscard]] inline bool is_utf8_1(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return c <= 0x7fu; }
+        template<typename T> [[nodiscard]] inline bool is_utf8_2(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return c > 0x7fu && c <= 0x7ffu; }
+        template<typename T> [[nodiscard]] inline bool is_utf8_3(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return c > 0x7ffu && c <= 0xffffu; }
+        template<typename T> [[nodiscard]] inline bool is_utf8_4(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return c > 0xffffu && c <= 0x1f'ffffu; }
+        template<typename T> [[nodiscard]] inline bool is_utf8_5(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return c > 0x1f'ffffu && c <= 0x3ff'ffffu; }
+        template<typename T> [[nodiscard]] inline bool is_utf8_6(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return c > 0x3ff'ffffu && c <= 0x7fff'ffffu; }
+
+        template<typename R,        typename C> [[nodiscard]] inline R e_utf8_1(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return c & 0b0111'1111; }
+        template<typename R,        typename C> [[nodiscard]] inline R e_utf8_2(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return     0b1100'0000 | (((c >> (6 * 1)) & 0b0001'1111)); }
+        template<typename R,        typename C> [[nodiscard]] inline R e_utf8_3(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return     0b1110'0000 | (((c >> (6 * 2)) & 0b0000'1111)); }
+        template<typename R,        typename C> [[nodiscard]] inline R e_utf8_4(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return     0b1111'0000 | (((c >> (6 * 3)) & 0b0000'0111)); }
+        template<typename R,        typename C> [[nodiscard]] inline R e_utf8_5(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return     0b1111'1000 | (((c >> (6 * 4)) & 0b0000'0011)); }
+        template<typename R,        typename C> [[nodiscard]] inline R e_utf8_6(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return     0b1111'1100 | (((c >> (6 * 5)) & 0b0000'0001)); }
+        template<typename R, int N, typename C> [[nodiscard]] inline R e_utf8_m(C const c) noexcept { static_assert(is_char8_type_v<R> && (is_char16_type_v<C> || is_char32_type_v<C>), "unsupported type"); return     0b1000'0000 | (((c >> (6 * N)) & 0b0011'1111)); }
+
+        template<typename T> [[nodiscard]] inline bool is_utf16_h(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return (c & 0xfc00u) == 0xd800u; }
+        template<typename T> [[nodiscard]] inline bool is_utf16_l(T const c) noexcept { static_assert(is_char16_type_v<T> || is_char32_type_v<T>, "unsupported type"); return (c & 0xfc00u) == 0xdc00u; }
+
+        template<typename T>
+        [[nodiscard]] inline size_t utf32_to_utf8(char32_t const c, T (&s)[8], bool const extended = false) noexcept {
+            static_assert(is_char8_type_v<T>, "unsupported type");
             if (is_utf8_1(c)) {
-                s[0] = e_utf8_1(c);
+                s[0] = e_utf8_1<T>(c);
                 s[1] = {};
                 return 1;
             }
             if (is_utf8_2(c)) {
-                s[0] = e_utf8_2(c);
-                s[1] = e_utf8_m(c, 0);
+                s[0] = e_utf8_2<T>(c);
+                s[1] = e_utf8_m<T, 0>(c);
                 s[2] = {};
                 return 2;
             }
             if (!is_utf16_h(c) && !is_utf16_l(c) && is_utf8_3(c)) {
-                s[0] = e_utf8_3(c);
-                s[1] = e_utf8_m(c, 1);
-                s[2] = e_utf8_m(c, 0);
+                s[0] = e_utf8_3<T>(c);
+                s[1] = e_utf8_m<T, 1>(c);
+                s[2] = e_utf8_m<T, 0>(c);
                 s[3] = {};
                 return 3;
             }
             if (is_utf8_4(c)) {
-                s[0] = e_utf8_4(c);
-                s[1] = e_utf8_m(c, 2);
-                s[2] = e_utf8_m(c, 1);
-                s[3] = e_utf8_m(c, 0);
+                s[0] = e_utf8_4<T>(c);
+                s[1] = e_utf8_m<T, 2>(c);
+                s[2] = e_utf8_m<T, 1>(c);
+                s[3] = e_utf8_m<T, 0>(c);
                 s[4] = {};
                 return 4;
             }
             if (extended && is_utf8_5(c)) {
-                s[0] = e_utf8_5(c);
-                s[1] = e_utf8_m(c, 3);
-                s[2] = e_utf8_m(c, 2);
-                s[3] = e_utf8_m(c, 1);
-                s[4] = e_utf8_m(c, 0);
+                s[0] = e_utf8_5<T>(c);
+                s[1] = e_utf8_m<T, 3>(c);
+                s[2] = e_utf8_m<T, 2>(c);
+                s[3] = e_utf8_m<T, 1>(c);
+                s[4] = e_utf8_m<T, 0>(c);
                 s[5] = {};
                 return 5;
             }
             if (extended && is_utf8_6(c)) {
-                s[0] = e_utf8_6(c);
-                s[1] = e_utf8_m(c, 4);
-                s[2] = e_utf8_m(c, 3);
-                s[3] = e_utf8_m(c, 2);
-                s[4] = e_utf8_m(c, 1);
-                s[5] = e_utf8_m(c, 0);
+                s[0] = e_utf8_6<T>(c);
+                s[1] = e_utf8_m<T, 4>(c);
+                s[2] = e_utf8_m<T, 3>(c);
+                s[3] = e_utf8_m<T, 2>(c);
+                s[4] = e_utf8_m<T, 1>(c);
+                s[5] = e_utf8_m<T, 0>(c);
                 s[6] = {};
                 return 6;
             }
@@ -99,68 +127,75 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
             return 1;
         }
 
-        [[nodiscard]] inline bool is_utf8_1(char8_t const c) noexcept { return (c & 0x80_u8) == 0x00_u8; }
-        [[nodiscard]] inline bool is_utf8_2(char8_t const c) noexcept { return (c & 0xe0_u8) == 0xc0_u8; }
-        [[nodiscard]] inline bool is_utf8_3(char8_t const c) noexcept { return (c & 0xf0_u8) == 0xe0_u8; }
-        [[nodiscard]] inline bool is_utf8_4(char8_t const c) noexcept { return (c & 0xf8_u8) == 0xf0_u8; }
-        [[nodiscard]] inline bool is_utf8_5(char8_t const c) noexcept { return (c & 0xfc_u8) == 0xf8_u8; }
-        [[nodiscard]] inline bool is_utf8_6(char8_t const c) noexcept { return (c & 0xfe_u8) == 0xfc_u8; }
-        [[nodiscard]] inline bool is_utf8_m(char8_t const c) noexcept { return (c & 0xc0_u8) == 0x80_u8; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_1(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1000'0000) == 0b0000'0000; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_2(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1110'0000) == 0b1100'0000; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_3(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1111'0000) == 0b1110'0000; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_4(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1111'1000) == 0b1111'0000; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_5(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1111'1100) == 0b1111'1000; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_6(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1111'1110) == 0b1111'1100; }
+        template<typename T>        [[nodiscard]] inline bool      r_utf8_m(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b1100'0000) == 0b1000'0000; }
 
-        [[nodiscard]] inline char32_t d_utf8_2(char8_t const c) noexcept { return (c & 0x1fu) << (6 * 1); }
-        [[nodiscard]] inline char32_t d_utf8_3(char8_t const c) noexcept { return (c & 0x0fu) << (6 * 2); }
-        [[nodiscard]] inline char32_t d_utf8_4(char8_t const c) noexcept { return (c & 0x07u) << (6 * 3); }
-        [[nodiscard]] inline char32_t d_utf8_5(char8_t const c) noexcept { return (c & 0x03u) << (6 * 4); }
-        [[nodiscard]] inline char32_t d_utf8_6(char8_t const c) noexcept { return (c & 0x01u) << (6 * 5); }
-        [[nodiscard]] inline char32_t d_utf8_m(char8_t const c, int const unit) noexcept { return (c & 0x3fu) << (6 * unit); }
+        template<typename T>        [[nodiscard]] inline char32_t  d_utf8_2(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b0001'1111) << (6 * 1); }
+        template<typename T>        [[nodiscard]] inline char32_t  d_utf8_3(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b0000'1111) << (6 * 2); }
+        template<typename T>        [[nodiscard]] inline char32_t  d_utf8_4(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b0000'0111) << (6 * 3); }
+        template<typename T>        [[nodiscard]] inline char32_t  d_utf8_5(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b0000'0011) << (6 * 4); }
+        template<typename T>        [[nodiscard]] inline char32_t  d_utf8_6(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b0000'0001) << (6 * 5); }
+        template<int N, typename T> [[nodiscard]] inline char32_t  d_utf8_m(T const c) noexcept { static_assert(is_char8_type_v<T>, "unsupported type"); return (c & 0b0011'1111) << (6 * N); }
 
-        [[nodiscard]] inline size_t utf8_to_utf32(char8_t const* const s, size_t const n, char32_t& c, bool const extended = false) noexcept {
-            if (is_utf8_1(s[0])) {
+        template<typename T>
+        [[nodiscard]] inline size_t utf8_to_utf32(T const* const s, size_t const n, char32_t& c, bool const extended = false) noexcept {
+            static_assert(is_char8_type_v<T>, "unsupported type");
+            if (r_utf8_1(s[0])) {
                 c = s[0];
                 return 1;
             }
-            if (n >= 2 && is_utf8_2(s[0])) {
-                if (is_utf8_m(s[1])) {
-                    c = d_utf8_2(s[0]) | d_utf8_m(s[1], 0);
-                    return 2;
-                }
+            if (n >= 2 && r_utf8_2(s[0]) && r_utf8_m(s[1])) {
+                c = d_utf8_2(s[0])
+                | d_utf8_m<0>(s[1]);
+                return 2;
             }
-            else if (n >= 3 && is_utf8_3(s[0])) {
-                if (is_utf8_m(s[1]) && is_utf8_m(s[2])) {
-                    c = d_utf8_3(s[0]) | d_utf8_m(s[1], 1) | d_utf8_m(s[2], 0);
-                    return 3;
-                }
+            if (n >= 3 && r_utf8_3(s[0]) && r_utf8_m(s[1]) && r_utf8_m(s[2])) {
+                c = d_utf8_3(s[0])
+                | d_utf8_m<1>(s[1])
+                | d_utf8_m<0>(s[2]);
+                return 3;
             }
-            else if (n >= 4 && is_utf8_4(s[0])) {
-                if (is_utf8_m(s[1]) && is_utf8_m(s[2]) && is_utf8_m(s[3])) {
-                    c = d_utf8_4(s[0]) | d_utf8_m(s[1], 2) | d_utf8_m(s[2], 1) | d_utf8_m(s[3], 0);
-                    return 4;
-                }
+            if (n >= 4 && r_utf8_4(s[0]) && r_utf8_m(s[1]) && r_utf8_m(s[2]) && r_utf8_m(s[3])) {
+                c = d_utf8_4(s[0])
+                | d_utf8_m<2>(s[1])
+                | d_utf8_m<1>(s[2])
+                | d_utf8_m<0>(s[3]);
+                return 4;
             }
-            else if (extended && n >= 5 && is_utf8_5(s[0])) {
-                if (is_utf8_m(s[1]) && is_utf8_m(s[2]) && is_utf8_m(s[3]) && is_utf8_m(s[4])) {
-                    c = d_utf8_5(s[0]) | d_utf8_m(s[1], 3) | d_utf8_m(s[2], 2) | d_utf8_m(s[3], 1) | d_utf8_m(s[4], 0);
-                    return 5;
-                }
+            if (extended && n >= 5 && r_utf8_5(s[0]) && r_utf8_m(s[1]) && r_utf8_m(s[2]) && r_utf8_m(s[3]) && r_utf8_m(s[4])) {
+                c = d_utf8_5(s[0])
+                | d_utf8_m<3>(s[1])
+                | d_utf8_m<2>(s[2])
+                | d_utf8_m<1>(s[3])
+                | d_utf8_m<0>(s[4]);
+                return 5;
             }
-            else if (extended && n >= 6 && is_utf8_6(s[0])) {
-                if (is_utf8_m(s[1]) && is_utf8_m(s[2]) && is_utf8_m(s[3]) && is_utf8_m(s[4]) && is_utf8_m(s[5])) {
-                    c = d_utf8_6(s[0]) | d_utf8_m(s[1], 4) | d_utf8_m(s[2], 3) | d_utf8_m(s[3], 2) | d_utf8_m(s[4], 1) | d_utf8_m(s[5], 0);
-                    return 6;
-                }
+            if (extended && n >= 6 && r_utf8_6(s[0]) && r_utf8_m(s[1]) && r_utf8_m(s[2]) && r_utf8_m(s[3]) && r_utf8_m(s[4]) && r_utf8_m(s[5])) {
+                c = d_utf8_6(s[0])
+                | d_utf8_m<4>(s[1])
+                | d_utf8_m<3>(s[2])
+                | d_utf8_m<2>(s[3])
+                | d_utf8_m<1>(s[4])
+                | d_utf8_m<0>(s[5]);
+                return 6;
             }
             c = U'?';
             return 1;
         }
 
-        [[nodiscard]] inline bool is_utf16_h(char16_t const c) noexcept { return (c & 0xfc00u) == 0xd800u; }
-        [[nodiscard]] inline bool is_utf16_l(char16_t const c) noexcept { return (c & 0xfc00u) == 0xdc00u; }
-
-        [[nodiscard]] inline char32_t utf16_to_utf32(char16_t const h, char16_t const l) noexcept {
+        template<typename T>
+        [[nodiscard]] inline char32_t utf16_to_utf32(T const h, T const l) noexcept {
+            static_assert(is_char16_type_v<T>, "unsupported type");
             return 0x10000u + ((h & 0x3ffu) << 10) | (l & 0x3ffu);
         }
-
-        [[nodiscard]] inline size_t utf16_to_utf32(char16_t const* const s, size_t const n, char32_t& c) {
+        template<typename T>
+        [[nodiscard]] inline size_t utf16_to_utf32(T const* const s, size_t const n, char32_t& c) {
+            static_assert(is_char16_type_v<T>, "unsupported type");
             if (n >= 2 && is_utf16_h(s[0]) && is_utf16_l(s[1])) {
                 c = utf16_to_utf32(s[0], s[1]);
                 return 2;
@@ -173,7 +208,9 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
             return 1;
         }
 
-        [[nodiscard]] inline size_t utf32_to_utf16(char32_t const c, char16_t (&s)[4]) noexcept {
+        template<typename T>
+        [[nodiscard]] inline size_t utf32_to_utf16(char32_t const c, T (&s)[4]) noexcept {
+            static_assert(is_char16_type_v<T>, "unsupported type");
             if (!is_utf16_h(c) && !is_utf16_l(c) && c <= 0xffffu) {
                 s[0] = c & 0xffffu;
                 s[1] = {};
@@ -192,258 +229,72 @@ namespace PAINFUL_CPP_STRING_CONVERSION_NAMESPACE {
         }
     }
 
-    // convert template
-
     template<typename Target, typename Source>
-    Target PAINFUL_CPP_STRING_CONVERSION_FUNCTION(Source const& s);
-
-    // std::string_view <---> std::u8string_view
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
-        return { reinterpret_cast<std::string_view::const_pointer>(s.data()), s.size() };
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        return { reinterpret_cast<std::string_view::const_pointer>(s.data()), s.size() };
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u8string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string_view const& s) {
-        return { reinterpret_cast<std::u8string_view::const_pointer>(s.data()), s.size() };
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u8string_view PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
-        return { reinterpret_cast<std::u8string_view::const_pointer>(s.data()), s.size() };
-    }
-
-    // std::string
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
-        return { reinterpret_cast<std::string::const_pointer>(s.data()), s.size() };
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        return { reinterpret_cast<std::string::const_pointer>(s.c_str()), s.length() };
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string_view const& s) {
-        std::string buffer;
-        char16_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char8_t t[8]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf16_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
+    Target PAINFUL_CPP_STRING_CONVERSION_FUNCTION(Source const& s, bool extended = false) {
+        static_assert(!std::is_same_v<Source, Target>, "unnecessary conversion");
+        static_assert(details::is_supported_char_type_v<typename Source::value_type> && details::is_supported_char_type_v<typename Target::value_type>, "unsupported type");
+        if constexpr (std::is_same_v<typename Source::value_type, typename Target::value_type>) {
+            return { s.data(), s.size() };
         }
-        return buffer;
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::string>(std::u16string_view(s));
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string_view const& s) {
-        std::string buffer;
-        char8_t t[8]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(reinterpret_cast<std::string::const_pointer>(t), m);
+        else if constexpr ((details::is_char8_type_v<typename Source::value_type> && details::is_char8_type_v<typename Target::value_type>) || (details::is_char16_type_v<typename Source::value_type> && details::is_char16_type_v<typename Target::value_type>)) {
+            return { reinterpret_cast<typename Target::value_type const*>(s.data()), s.size() };
         }
-        return buffer;
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::string>(std::u32string_view(s));
-    }
-
-    // std::u8string
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string_view const& s) {
-        return { reinterpret_cast<std::u8string::const_pointer>(s.data()), s.size() };
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
-        return { reinterpret_cast<std::u8string::const_pointer>(s.c_str()), s.length() };
-    }
-
-    template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string_view const& s) {
-        std::u8string buffer;
-        char16_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char8_t t[8]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf16_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(t, m);
+        else {
+            typename Source::value_type const* s_ptr = s.data();
+            size_t s_len = s.size();
+            Target d;
+            char32_t c32{};
+            while (s_len > 0) {
+                // decode
+                if constexpr (details::is_char8_type_v<typename Source::value_type>) {
+                    auto const n = details::utf8_to_utf32(s_ptr, s_len, c32, extended);
+                    s_ptr += n;
+                    s_len -= n;
+                }
+                else if constexpr (details::is_char16_type_v<typename Source::value_type>) {
+                    auto const n = details::utf16_to_utf32(s_ptr, s_len, c32);
+                    s_ptr += n;
+                    s_len -= n;
+                }
+                else if constexpr (std::is_same_v<typename Source::value_type, char32_t>) {
+                    c32 = s_ptr[0];
+                    s_ptr++;
+                    s_len--;
+                }
+                else {
+                    static_assert(false, "unsupported type");
+                }
+                // encode
+                if constexpr (details::is_char8_type_v<typename Target::value_type>) {
+                    typename Target::value_type c8[8]{};
+                    auto const n = details::utf32_to_utf8(c32, c8, extended);
+                    d.append(c8, n);
+                }
+                else if constexpr (details::is_char16_type_v<typename Target::value_type>) {
+                    typename Target::value_type c16[4]{};
+                    auto const n = details::utf32_to_utf16(c32, c16);
+                    d.append(c16, n);
+                }
+                else if constexpr (std::is_same_v<typename Target::value_type, char32_t>) {
+                    d.push_back(c32);
+                }
+                else {
+                    static_assert(false, "unsupported type");
+                }
+            }
+            return d;
         }
-        return buffer;
-    }
-
-    template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u8string>(std::u16string_view(s));
-    }
-
-    template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string_view const& s) {
-        std::u8string buffer;
-        char8_t t[8]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf8(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
-    }
-
-    template<> inline std::u8string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u8string>(std::u32string_view(s));
-    }
-
-    // std::u16string
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string_view const& s) {
-        std::u16string buffer;
-        auto p = reinterpret_cast<char8_t const*>(s.data());
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char16_t t[4]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u16string>(std::string_view(s));
-    }
-
-    template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
-        std::u16string buffer;
-        char8_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        char16_t t[4]{};
-        size_t m{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
-    }
-
-    template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u16string>(std::u8string_view(s));
-    }
-
-    template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string_view const& s) {
-        std::u16string buffer;
-        char16_t t[4]{};
-        size_t m{};
-        for (auto const c : s) {
-            m = details::utf32_to_utf16(c, t);
-            buffer.append(t, m);
-        }
-        return buffer;
-    }
-
-    template<> inline std::u16string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u32string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u16string>(std::u32string_view(s));
-    }
-
-    // std::u32string
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string_view const& s) {
-        std::u32string buffer;
-        auto p = reinterpret_cast<char8_t const*>(s.data());
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            buffer.push_back(c);
-        }
-        return buffer;
-    }
-
-    // Always assume that the std::string stores text encoded in UTF-8
-    template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u32string>(std::string_view(s));
-    }
-
-    template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string_view const& s) {
-        std::u32string buffer;
-        char8_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        while (n > 0) {
-            o = details::utf8_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            buffer.push_back(c);
-        }
-        return buffer;
-    }
-
-    template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u8string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u32string>(std::u8string_view(s));
-    }
-
-    template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string_view const& s) {
-        std::u32string buffer;
-        char16_t const* p = s.data();
-        size_t n = s.size();
-        size_t o{};
-        char32_t c{};
-        while (n > 0) {
-            o = details::utf16_to_utf32(p, n, c);
-            p += o;
-            n -= o;
-            buffer.push_back(c);
-        }
-        return buffer;
-    }
-
-    template<> inline std::u32string PAINFUL_CPP_STRING_CONVERSION_FUNCTION(std::u16string const& s) {
-        return PAINFUL_CPP_STRING_CONVERSION_FUNCTION<std::u32string>(std::u16string_view(s));
     }
 }
 
+#ifdef PAINFUL_CPP_STRING_CONVERSION_NAMESPACE_DEFAULT
+#undef PAINFUL_CPP_STRING_CONVERSION_NAMESPACE
+#undef PAINFUL_CPP_STRING_CONVERSION_NAMESPACE_DEFAULT
 #endif
+
+#ifdef PAINFUL_CPP_STRING_CONVERSION_FUNCTION_DEFAULT
+#undef PAINFUL_CPP_STRING_CONVERSION_FUNCTION
+#undef PAINFUL_CPP_STRING_CONVERSION_FUNCTION_DEFAULT
+#endif
+
+#endif // PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H

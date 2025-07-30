@@ -1,12 +1,22 @@
-#include "ext/string_literals_encoding_compile_time_check.hpp"
 #include "ext/convert.hpp"
-#ifdef _WIN32
-#include "ext/convert_windows.hpp"
-#endif
 #include "simdutf.h"
 
 #include <cassert>
+#include <cstdio>
 #include <stdexcept>
+#include <string_view>
+#include <string>
+
+// c++ 17 polyfill
+#ifndef __cpp_char8_t
+using char8_t = uint8_t;
+#endif // __cpp_char8_t
+#ifndef __cpp_lib_char8_t
+namespace std {
+    using u8string = basic_string<char8_t>;
+    using u8string_view = basic_string_view<char8_t>;
+}
+#endif // __cpp_lib_char8_t
 
 namespace {
     void assert_true(bool const condition) {
@@ -184,5 +194,6 @@ int main() {
         assert_true(intermediate_string == std::string_view(string_data, string_size));
         assert_true(intermediate_string_utf16 == std::u16string_view(string_data_utf16, string_size_utf16));
     }
+    std::printf("All test pass.\n");
     return 0;
 }
