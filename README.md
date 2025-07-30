@@ -1,6 +1,6 @@
 # Painful C++ string conversion
 
-| [English](./README.md) | [中文](./README.ZH.md) |
+[English](./README.md) [中文](./README.ZH.md) [![CMake on multiple platforms](https://github.com/Demonese/painful-cpp-string-conversion/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/Demonese/painful-cpp-string-conversion/actions/workflows/cmake-multi-platform.yml)
 
 Why the conversion between C++ string/wstring/u8string/u16string/u32string so painful?
 
