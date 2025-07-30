@@ -77,42 +77,31 @@
             "configurePreset": "vs2022-amd64"
         },
         {
-            "name": "target-test",
-            "hidden": true,
-            "targets": [
-                "painful-cpp-string-conversion-test"
-            ]
-        },
-        {
             "name": "windows-x86-debug",
             "inherits": [
                 "windows-x86",
-                "debug",
-                "target-test"
+                "debug"
             ]
         },
         {
             "name": "windows-x86-release",
             "inherits": [
                 "windows-x86",
-                "release",
-                "target-test"
+                "release"
             ]
         },
         {
             "name": "windows-amd64-debug",
             "inherits": [
                 "windows-amd64",
-                "debug",
-                "target-test"
+                "debug"
             ]
         },
         {
             "name": "windows-amd64-release",
             "inherits": [
                 "windows-amd64",
-                "release",
-                "target-test"
+                "release"
             ]
         },
         {
@@ -124,16 +113,14 @@
             "name": "ninja-amd64-debug",
             "inherits": [
                 "ninja-amd64",
-                "debug",
-                "target-test"
+                "debug"
             ]
         },
         {
             "name": "ninja-amd64-release",
             "inherits": [
                 "ninja-amd64",
-                "release",
-                "target-test"
+                "release"
             ]
         }
     ],
