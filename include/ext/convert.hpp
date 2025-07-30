@@ -8,6 +8,7 @@
 #ifndef PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H
 #define PAINFUL_CPP_STRING_CONVERSION_EXT_CONVERT_H
 
+#include <cstddef>
 #include <climits>
 #include <cstdint>
 #include <type_traits>
