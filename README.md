@@ -65,6 +65,5 @@ int main() {
 
 # TODO
 
-* [ ] Supports raw character array as parameter
 * [ ] Supports span or span-like types as parameter
 * [ ] Supports simdutf as a high-speed conversion implementation
